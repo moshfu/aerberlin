@@ -1,0 +1,81 @@
+{
+  "general": {
+    "brand": "aer berlin",
+    "tagline": "immersive trance collective",
+    "viewAll": "View all",
+    "buyTickets": "Buy ticket",
+    "soldOut": "Sold out",
+    "lowStock": "Low stock",
+    "newsletterCta": "Join the newsletter",
+    "submit": "Submit",
+    "checkout": "Checkout",
+    "total": "Total",
+    "close": "Close",
+    "loading": "Loading...",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "readMore": "Read more"
+  },
+  "navigation": {
+    "events": "Events",
+    "tickets": "Tickets",
+    "artists": "Artists",
+    "music": "Music",
+    "gallery": "Gallery",
+    "about": "About",
+    "imprint": "Imprint",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "home": {
+    "heroHeadline": "Transcendent trance from Berlin",
+    "heroSubheadline": "aer berlin merges underground intensity with future-facing visuals. Lock in the next transmission.",
+    "nextEvents": "Next events",
+    "latestRelease": "Latest release",
+    "newsletterHeadline": "Stay in the frequency",
+    "newsletterCopy": "Be first for drops, presale passwords and secret warehouse coordinates.",
+    "newsletterPlaceholder": "name@email.com",
+    "newsletterSuccess": "Welcome to the list. See you on the floor.",
+    "newsletterError": "Something glitched. Try again in a beat.",
+    "socialHeadline": "Follow the transmission"
+  },
+  "events": {
+    "title": "Events",
+    "filter": {
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "all": "All",
+      "calendar": "Calendar"
+    },
+    "noEvents": "No events in this category yet."
+  },
+  "tickets": {
+    "title": "Tickets",
+    "instructions": "Secure your spot via Pretix with secure EU-compliant checkout.",
+    "cart": "Cart",
+    "total": "Total",
+    "checkout": "Checkout"
+  },
+  "artists": {
+    "title": "Artists",
+    "filters": {
+      "all": "All",
+      "residents": "Residents",
+      "guests": "Guests",
+      "a-z": "A–Z"
+    }
+  },
+  "music": {
+    "title": "Releases",
+    "latest": "Latest"
+  },
+  "gallery": {
+    "title": "Gallery",
+    "filter": "Filter by tag"
+  },
+  "about": {
+    "title": "About",
+    "mission": "Mission",
+    "inclusivity": "Inclusivity statement"
+  }
+}

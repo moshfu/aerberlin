@@ -1,0 +1,206 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  STAFF
+  MEMBER
+}
+
+enum TicketOrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum TicketStatus {
+  PENDING
+  READY
+  USED
+  CANCELLED
+  INVALID
+}
+
+enum CheckInStatus {
+  VALID
+  USED
+  INVALID
+  ERROR
+}
+
+enum SubscriptionStatus {
+  PENDING
+  CONFIRMED
+  UNSUBSCRIBED
+}
+
+enum SubscriptionSource {
+  WEBSITE
+  CHECKOUT
+  ADMIN
+}
+
+model User {
+  id            String           @id @default(cuid())
+  name          String?
+  email         String?          @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role             @default(MEMBER)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  passkeys      Passkey[]
+  checkIns      CheckInLog[]     @relation("UserCheckins")
+}
+
+model Passkey {
+  id           String   @id @default(cuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  name         String?
+  credentialId String   @unique
+  publicKey    String
+  counter      Int      @default(0)
+  transports   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+  oauth_token_secret String?
+  oauth_token        String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model TicketOrder {
+  id                        String            @id @default(cuid())
+  email                     String?
+  fullName                  String?
+  pretixOrderCode           String?           @unique
+  pretixEventSlug           String?
+  stripeCheckoutSessionId   String?           @unique
+  status                    TicketOrderStatus @default(PENDING)
+  totalGross                Decimal?          @db.Decimal(10, 2)
+  currency                  String            @default("EUR")
+  eventSlug                 String
+  eventTitle                String?
+  locale                    String            @default("en")
+  metadata                  Json?
+  createdAt                 DateTime          @default(now())
+  updatedAt                 DateTime          @updatedAt
+  items                     TicketItem[]
+  tickets                   Ticket[]
+}
+
+model TicketItem {
+  id              String       @id @default(cuid())
+  order           TicketOrder  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId         String
+  pretixProductId String?
+  name            String
+  quantity        Int          @default(1)
+  unitPrice       Decimal?     @db.Decimal(10, 2)
+  currency        String       @default("EUR")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Ticket {
+  id                String        @id @default(cuid())
+  order             TicketOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId           String
+  pretixPositionId  String?       @unique
+  qrCode            String?       @db.Text
+  status            TicketStatus  @default(PENDING)
+  holderName        String?
+  holderEmail       String?
+  ticketType        String?
+  seat              String?
+  metadata          Json?
+  checkedInAt       DateTime?
+  checkInSource     String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  checkInLogs       CheckInLog[]
+
+  @@index([orderId])
+}
+
+model CheckInLog {
+  id           String         @id @default(cuid())
+  ticket       Ticket?        @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticketId     String?
+  ticketCode   String?
+  pretixEvent  String?
+  status       CheckInStatus  @default(VALID)
+  message      String?
+  scannedAt    DateTime       @default(now())
+  scanner      User?          @relation("UserCheckins", fields: [scannerId], references: [id], onDelete: SetNull)
+  scannerId    String?
+  source       String?
+  metadata     Json?
+
+  @@index([ticketId])
+  @@index([scannerId])
+  @@index([ticketCode])
+}
+
+model Subscription {
+  id         String              @id @default(cuid())
+  email      String
+  status     SubscriptionStatus  @default(PENDING)
+  source     SubscriptionSource  @default(WEBSITE)
+  locale     String              @default("en")
+  consentedAt DateTime?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  metadata   Json?
+
+  @@unique([email, source])
+}

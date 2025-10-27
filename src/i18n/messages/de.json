@@ -1,0 +1,81 @@
+{
+  "general": {
+    "brand": "aer berlin",
+    "tagline": "immersives Trance-Kollektiv",
+    "viewAll": "Alle ansehen",
+    "buyTickets": "Ticket kaufen",
+    "soldOut": "Ausverkauft",
+    "lowStock": "Wenige verfügbar",
+    "newsletterCta": "Newsletter abonnieren",
+    "submit": "Absenden",
+    "checkout": "Zur Kasse",
+    "total": "Summe",
+    "close": "Schließen",
+    "loading": "Lädt...",
+    "upcoming": "Bevorstehend",
+    "past": "Vergangen",
+    "readMore": "Mehr erfahren"
+  },
+  "navigation": {
+    "events": "Events",
+    "tickets": "Tickets",
+    "artists": "Artists",
+    "music": "Releases",
+    "gallery": "Galerie",
+    "about": "Über uns",
+    "impressum": "Impressum",
+    "privacy": "Datenschutz",
+    "agb": "AGB"
+  },
+  "home": {
+    "heroHeadline": "Transzendenter Trance aus Berlin",
+    "heroSubheadline": "aer berlin vereint Underground-Energie mit futuristischer Visualität. Sichere dir die nächste Transmission.",
+    "nextEvents": "Nächste Events",
+    "latestRelease": "Aktuelles Release",
+    "newsletterHeadline": "Bleib auf der Frequenz",
+    "newsletterCopy": "Als Erste:r von Drops, Presales und geheimen Warehouse-Koordinaten erfahren.",
+    "newsletterPlaceholder": "name@email.de",
+    "newsletterSuccess": "Willkommen im Kreis. Wir sehen uns auf dem Floor.",
+    "newsletterError": "Etwas ist schiefgelaufen. Versuch es später erneut.",
+    "socialHeadline": "Folge dem Signal"
+  },
+  "events": {
+    "title": "Events",
+    "filter": {
+      "upcoming": "Bevorstehend",
+      "past": "Vergangen",
+      "all": "Alle",
+      "calendar": "Kalender"
+    },
+    "noEvents": "Noch keine Events in dieser Kategorie."
+  },
+  "tickets": {
+    "title": "Tickets",
+    "instructions": "Sichere dir deinen Platz via Pretix mit EU-konformem Checkout.",
+    "cart": "Warenkorb",
+    "total": "Summe",
+    "checkout": "Zur Kasse"
+  },
+  "artists": {
+    "title": "Artists",
+    "filters": {
+      "all": "Alle",
+      "residents": "Residents",
+      "guests": "Guests",
+      "a-z": "A–Z"
+    }
+  },
+  "music": {
+    "title": "Releases",
+    "latest": "Neu"
+  },
+  "gallery": {
+    "title": "Galerie",
+    "filter": "Nach Tag filtern"
+  },
+  "about": {
+    "title": "Über uns",
+    "mission": "Mission",
+    "inclusivity": "Inklusivitäts-Statement"
+  }
+}

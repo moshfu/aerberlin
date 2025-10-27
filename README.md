@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# aer berlin Platform
+
+High-contrast Next.js 15 web app for the Berlin trance collective aer berlin. Provides multilingual editorial pages powered by Sanity CMS, ticketing via Pretix + Stripe, and operations tooling for check-in staff.
+
+## Stack
+
+- **Frontend**: Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, shadcn/ui
+- **Animations**: Framer Motion, subtle hover states respecting reduced-motion
+- **CMS**: Sanity v3 with Studio mounted at `/studio`
+- **Data**: PostgreSQL via Prisma (Vercel Postgres / Neon compatible)
+- **Auth**: next-auth (magic link email) with Prisma adapter
+- **Ticketing**: Pretix REST API + Stripe Checkout; QR validation console for door staff
+- **Testing**: Vitest (unit), Playwright (e2e)
+- **Tooling**: ESLint, Prettier, GitHub Actions CI, Plausible analytics hook
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
+cp .env.example .env.local
+# fill in secrets, especially DATABASE_URL and Pretix/Stripe keys
+npm run prisma:generate
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app defaults to `http://localhost:3000`. Routes are prefixed with `/en` or `/de`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Mock toggles in `.env.local` (`USE_MOCK_SANITY`, `USE_MOCK_PRETIX`, `USE_MOCK_STRIPE`, `USE_MOCK_AUTH`) are enabled by default so you can browse the UI without external services. Set them to `false` once real integrations are wired.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Database & Prisma
 
-## Learn More
+Create the schema locally:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run db:push
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Prisma models cover ticket orders, items, and check-in logs for Pretix interactions.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Sanity Studio & Seed
 
-## Deploy on Vercel
+Sanity Studio lives at `/studio` and uses project/dataset from the environment.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Seed example content (events, artists, releases, pages) once you set `SANITY_WRITE_TOKEN`:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run seed
+```
+
+Run Sanity locally:
+
+```bash
+npm run sanity:dev
+```
+
+### Pretix & Stripe Integration
+
+- `PRETIX_API_URL` should point to your organizer endpoint (e.g. `https://pretix.eu/api/v1/organizers/aerberlin`).
+- `PRETIX_CHECKIN_LIST_ID` represents the Pretix check-in list to use for QR validation.
+- `PRETIX_WEBHOOK_SECRET` is matched against the `x-pretix-signature` header.
+- Stripe Checkout sessions store the Prisma order id in metadata; Stripe webhooks complete the order record.
+- Pretix webhooks update orders and append check-in logs; adapt the payload mapping as you refine your Pretix setup.
+
+### Authentication
+
+Magic-link email sign-in is enabled via next-auth Email provider. Configure SMTP credentials in `.env.local`. Protected routes such as `/checkin` or `/admin` require role `STAFF` or `ADMIN` on the Prisma `User` model.
+
+### Testing
+
+```bash
+npm run test:unit     # Vitest
+npm run test:e2e      # Playwright (starts dev server automatically)
+```
+
+Playwright uses `playwright.config.ts` with a local dev server; override `PLAYWRIGHT_BASE_URL` for remote runs.
+
+### Linting & Type Safety
+
+```bash
+npm run lint
+npm run typecheck
+```
+
+### GitHub Actions
+
+`.github/workflows/ci.yml` runs lint, typecheck, Vitest, and Playwright on pushes/PRs targeting `main`.
+
+### Deployment
+
+Deploy to Vercel:
+
+1. Provision Vercel Postgres and set `DATABASE_URL`.
+2. Configure Sanity dataset + API token, Pretix + Stripe secrets, analytics toggles.
+3. Add `NEXTAUTH_SECRET` (use `openssl rand -base64 32`).
+4. Enable webhooks:
+   - Pretix → `https://your-domain/api/webhooks/pretix`
+   - Stripe → `https://your-domain/api/webhooks/stripe`
+   - Sanity → `https://your-domain/api/webhooks/sanity`
+
+### Operations
+
+- `/admin` shows upcoming events and release counts (requires ADMIN/EDITOR role).
+- `/checkin` provides camera-based Pretix QR validation (requires STAFF/ADMIN).
+- `/tickets` pulls Pretix catalog data and launches Stripe Checkout.
+
+### Scripts
+
+- `npm run format` – Prettier with Tailwind plugin
+- `npm run prisma:migrate` – Create a new migration
+- `npm run prisma:deploy` – Apply migrations in production
+- `npm run seed` – Push starter content into Sanity
+
+## License
+
+MIT

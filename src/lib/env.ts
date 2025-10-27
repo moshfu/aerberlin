@@ -1,0 +1,96 @@
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+
+export const env = createEnv({
+  server: {
+    NODE_ENV: z.enum(["development", "test", "production"]).default(
+      "development",
+    ),
+    DATABASE_URL: z
+      .string()
+      .url()
+      .default("postgresql://user:password@localhost:5432/aerberlin"),
+    SANITY_PROJECT_ID: z.string().default("dummy"),
+    SANITY_DATASET: z.string().default("production"),
+    SANITY_API_VERSION: z.string().default("2023-10-01"),
+    SANITY_PREVIEW_SECRET: z.string().default("sanity-preview-secret"),
+    SANITY_WRITE_TOKEN: z.string().optional(),
+    PRETIX_API_TOKEN: z.string().default("pretix-token"),
+    PRETIX_API_URL: z
+      .string()
+      .url()
+      .default("https://pretix.invalid/api/v1/organizers/aerberlin"),
+    PRETIX_WEBHOOK_SECRET: z.string().default("pretix-webhook-secret"),
+    PRETIX_CHECKIN_LIST_ID: z.string().default("1"),
+    STRIPE_SECRET_KEY: z.string().default("sk_test_placeholder"),
+    STRIPE_PUBLISHABLE_KEY: z.string().default("pk_test_placeholder"),
+    STRIPE_WEBHOOK_SECRET: z.string().default("whsec_placeholder"),
+    NEXTAUTH_SECRET: z.string().default("development-nextauth-secret"),
+    EMAIL_SERVER_HOST: z.string().default("localhost"),
+    EMAIL_SERVER_PORT: z.coerce.number().default(1025),
+    EMAIL_SERVER_USER: z.string().default("user@example.com"),
+    EMAIL_SERVER_PASSWORD: z.string().default("password"),
+    BUTTONDOWN_API_KEY: z.string().optional(),
+    BUTTONDOWN_AUDIENCE_ID: z.string().optional(),
+    MAILCHIMP_API_KEY: z.string().optional(),
+    MAILCHIMP_SERVER_PREFIX: z.string().optional(),
+    PLAUSIBLE_DOMAIN: z.string().optional(),
+    GA4_MEASUREMENT_ID: z.string().optional(),
+    GA4_API_SECRET: z.string().optional(),
+    PRETIX_ORGANIZER_SLUG: z.string().default("aerberlin"),
+    PRETIX_EVENT_SERIES_SLUG: z.string().optional(),
+    USE_MOCK_SANITY: z.enum(["true", "false"]).default("true"),
+    USE_MOCK_PRETIX: z.enum(["true", "false"]).default("true"),
+    USE_MOCK_STRIPE: z.enum(["true", "false"]).default("true"),
+    USE_MOCK_AUTH: z.enum(["true", "false"]).default("true"),
+  },
+  client: {
+    NEXT_PUBLIC_APP_URL: z
+      .string()
+      .url()
+      .default("http://localhost:3000"),
+    NEXT_PUBLIC_SANITY_PROJECT_ID: z.string().default("dummy"),
+    NEXT_PUBLIC_SANITY_DATASET: z.string().default("production"),
+    NEXT_PUBLIC_PLAUSIBLE_ENABLED: z.enum(["true", "false"]).default("true"),
+    NEXT_PUBLIC_GA4_ENABLED: z.enum(["true", "false"]).default("false"),
+  },
+  runtimeEnv: {
+    NODE_ENV: process.env.NODE_ENV,
+    DATABASE_URL: process.env.DATABASE_URL,
+    SANITY_PROJECT_ID: process.env.SANITY_PROJECT_ID,
+    SANITY_DATASET: process.env.SANITY_DATASET,
+    SANITY_API_VERSION: process.env.SANITY_API_VERSION,
+    SANITY_PREVIEW_SECRET: process.env.SANITY_PREVIEW_SECRET,
+    SANITY_WRITE_TOKEN: process.env.SANITY_WRITE_TOKEN,
+    PRETIX_API_TOKEN: process.env.PRETIX_API_TOKEN,
+    PRETIX_API_URL: process.env.PRETIX_API_URL,
+    PRETIX_WEBHOOK_SECRET: process.env.PRETIX_WEBHOOK_SECRET,
+    PRETIX_CHECKIN_LIST_ID: process.env.PRETIX_CHECKIN_LIST_ID,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    EMAIL_SERVER_HOST: process.env.EMAIL_SERVER_HOST,
+    EMAIL_SERVER_PORT: process.env.EMAIL_SERVER_PORT,
+    EMAIL_SERVER_USER: process.env.EMAIL_SERVER_USER,
+    EMAIL_SERVER_PASSWORD: process.env.EMAIL_SERVER_PASSWORD,
+    BUTTONDOWN_API_KEY: process.env.BUTTONDOWN_API_KEY,
+    BUTTONDOWN_AUDIENCE_ID: process.env.BUTTONDOWN_AUDIENCE_ID,
+    MAILCHIMP_API_KEY: process.env.MAILCHIMP_API_KEY,
+    MAILCHIMP_SERVER_PREFIX: process.env.MAILCHIMP_SERVER_PREFIX,
+    PLAUSIBLE_DOMAIN: process.env.PLAUSIBLE_DOMAIN,
+    GA4_MEASUREMENT_ID: process.env.GA4_MEASUREMENT_ID,
+    GA4_API_SECRET: process.env.GA4_API_SECRET,
+    PRETIX_ORGANIZER_SLUG: process.env.PRETIX_ORGANIZER_SLUG,
+    PRETIX_EVENT_SERIES_SLUG: process.env.PRETIX_EVENT_SERIES_SLUG,
+    USE_MOCK_SANITY: process.env.USE_MOCK_SANITY,
+    USE_MOCK_PRETIX: process.env.USE_MOCK_PRETIX,
+    USE_MOCK_STRIPE: process.env.USE_MOCK_STRIPE,
+    USE_MOCK_AUTH: process.env.USE_MOCK_AUTH,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_SANITY_PROJECT_ID: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+    NEXT_PUBLIC_SANITY_DATASET: process.env.NEXT_PUBLIC_SANITY_DATASET,
+    NEXT_PUBLIC_PLAUSIBLE_ENABLED: process.env.NEXT_PUBLIC_PLAUSIBLE_ENABLED,
+    NEXT_PUBLIC_GA4_ENABLED: process.env.NEXT_PUBLIC_GA4_ENABLED,
+  },
+});
