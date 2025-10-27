@@ -67,18 +67,6 @@ export function SubpageFrame({
       </div>
 
       <div className="aer-content aer-content--subpage">
-        {siteConfig.brand.logo ? (
-          <Link href="/" className="aer-brand" aria-label={`${siteConfig.name} home`}>
-            <Image
-              src={siteConfig.brand.logo}
-              alt={`${siteConfig.name} logo`}
-              width={320}
-              height={320}
-              className="aer-logo"
-            />
-          </Link>
-        ) : null}
-
         <div className="aer-subpage">
           <div className="aer-subpage__inner">
             <header className="aer-subpage__header">
@@ -121,6 +109,18 @@ export function SubpageFrame({
             </div>
           </div>
         </div>
+
+        {siteConfig.brand.logo ? (
+          <Link href="/" className="aer-brand aer-brand--subpage" aria-label={`${siteConfig.name} home`}>
+            <Image
+              src={siteConfig.brand.logo}
+              alt={`${siteConfig.name} logo`}
+              width={240}
+              height={240}
+              className="aer-logo"
+            />
+          </Link>
+        ) : null}
       </div>
     </div>
   );

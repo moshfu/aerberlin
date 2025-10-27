@@ -41,10 +41,10 @@ export default async function HomePage() {
           <Image
             src={siteConfig.brand.logo}
             alt="aer berlin logo"
-            width={320}
-            height={320}
+            width={420}
+            height={420}
             priority
-            className="aer-logo"
+            className="aer-logo aer-logo--home"
           />
         ) : null}
 

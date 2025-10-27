@@ -32,10 +32,53 @@
     background: var(--color-background);
     font-family: var(--font-body, Inter), system-ui, -apple-system, "Segoe UI", sans-serif;
     min-height: 100vh;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='36' viewBox='0 0 24 36'%3E%3Cpath fill='%23ff102a' d='M2 2v32l6.6-5.4L14 34l2.6-2.6L12 24l6.6-1.2z'/%3E%3C/svg%3E") 2 2, auto;
   }
 }
 
 @layer components {
+  .aer-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.68rem 1.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 16, 42, 0.12);
+    color: var(--color-foreground);
+    font-size: 0.72rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    transition: border-color 160ms var(--transition-ease), background-color 160ms var(--transition-ease), transform 160ms var(--transition-ease), color 160ms var(--transition-ease);
+  }
+
+  .aer-button:hover,
+  .aer-button:focus-visible {
+    border-color: rgba(255, 16, 42, 0.75);
+    background: rgba(255, 16, 42, 0.26);
+    transform: translateY(-1px);
+  }
+
+  .aer-nav-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.68rem clamp(1.4rem, 4vw, 2.4rem);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 16, 42, 0.12);
+    color: var(--color-foreground);
+    font-size: 0.72rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    transition: border-color 160ms var(--transition-ease), background-color 160ms var(--transition-ease), transform 160ms var(--transition-ease), color 160ms var(--transition-ease);
+  }
+
+  .aer-nav-button:hover,
+  .aer-nav-button:focus-visible {
+    border-color: rgba(255, 16, 42, 0.75);
+    background: rgba(255, 16, 42, 0.26);
+    transform: translateY(-1px);
+  }
+
   .aer-root {
     position: relative;
     min-height: 100vh;
@@ -92,11 +135,19 @@
     justify-content: center;
   }
 
+  .aer-brand--subpage {
+    margin: clamp(3rem, 8vw, 4.5rem) auto clamp(2rem, 6vw, 3.25rem);
+  }
+
   .aer-logo {
     width: clamp(160px, 28vw, 320px);
     height: auto;
     border-radius: 12px;
     box-shadow: var(--shadow-subtle);
+  }
+
+  .aer-logo--home {
+    width: clamp(260px, 36vw, 420px);
   }
 
   .aer-marquee-shell {
@@ -339,19 +390,21 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.8rem 1.6rem;
-    border: 1px solid rgba(255, 16, 42, 0.4);
-    background: rgba(255, 16, 42, 0.15);
+    padding: 0.68rem 1.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 16, 42, 0.12);
+    color: var(--color-foreground);
     font-size: 0.68rem;
     letter-spacing: 0.24em;
     text-transform: uppercase;
-    transition: background-color 160ms ease, border-color 160ms ease;
+    transition: border-color 160ms var(--transition-ease), background-color 160ms var(--transition-ease), transform 160ms var(--transition-ease);
   }
 
   .aer-social-links a:hover,
   .aer-social-links a:focus-visible {
     border-color: rgba(255, 16, 42, 0.75);
-    background: rgba(255, 16, 42, 0.25);
+    background: rgba(255, 16, 42, 0.26);
+    transform: translateY(-1px);
   }
 
   .aer-artist {
