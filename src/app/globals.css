@@ -34,6 +34,10 @@
     min-height: 100vh;
     cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='36' viewBox='0 0 24 36'%3E%3Cpath fill='%23ff102a' d='M2 2v32l6.6-5.4L14 34l2.6-2.6L12 24l6.6-1.2z'/%3E%3C/svg%3E") 2 2, auto;
   }
+
+  body[data-aer-home="true"] .aer-header-logo {
+    display: none;
+  }
 }
 
 @layer components {
@@ -63,9 +67,9 @@
     align-items: center;
     justify-content: center;
     padding: 0.68rem clamp(1.4rem, 4vw, 2.4rem);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 16, 42, 0.12);
-    color: var(--color-foreground);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-accent);
     font-size: 0.72rem;
     letter-spacing: 0.26em;
     text-transform: uppercase;
@@ -74,8 +78,9 @@
 
   .aer-nav-button:hover,
   .aer-nav-button:focus-visible {
-    border-color: rgba(255, 16, 42, 0.75);
-    background: rgba(255, 16, 42, 0.26);
+    border-color: rgba(255, 16, 42, 0.85);
+    background: rgba(255, 16, 42, 0.85);
+    color: rgba(255, 16, 42, 0);
     transform: translateY(-1px);
   }
 
@@ -144,6 +149,16 @@
     height: auto;
     border-radius: 12px;
     box-shadow: var(--shadow-subtle);
+  }
+
+  .aer-header-logo {
+    display: flex;
+    justify-content: center;
+    padding: clamp(1.6rem, 5vw, 2.6rem) 0 0;
+  }
+
+  .aer-logo--home {
+    width: clamp(280px, 38vw, 440px);
   }
 
   .aer-logo--home {
@@ -391,9 +406,9 @@
     align-items: center;
     justify-content: center;
     padding: 0.68rem 1.4rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 16, 42, 0.12);
-    color: var(--color-foreground);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-accent);
     font-size: 0.68rem;
     letter-spacing: 0.24em;
     text-transform: uppercase;
@@ -402,8 +417,9 @@
 
   .aer-social-links a:hover,
   .aer-social-links a:focus-visible {
-    border-color: rgba(255, 16, 42, 0.75);
-    background: rgba(255, 16, 42, 0.26);
+    border-color: rgba(255, 16, 42, 0.85);
+    background: rgba(255, 16, 42, 0.85);
+    color: rgba(255, 16, 42, 0);
     transform: translateY(-1px);
   }
 

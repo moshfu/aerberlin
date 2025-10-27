@@ -7,20 +7,16 @@ export async function Footer() {
   const navigation = await getTranslations("navigation");
 
   return (
-    <footer className="border-t border-accent bg-background">
-      <div className="container flex flex-col items-center gap-2 py-4 text-[0.58rem] uppercase tracking-[0.32em] text-accent sm:flex-row sm:justify-between">
-        <p className="text-center sm:text-left">
-          © {year} {siteConfig.name}
-        </p>
-        <nav
-          aria-label="Legal"
-          className="flex flex-wrap items-center justify-center gap-4 text-[0.54rem] tracking-[0.24em] sm:justify-end"
-        >
+    <footer className="bg-background">
+      <div className="h-px w-full bg-accent" />
+      <div className="container flex flex-col items-center gap-2 py-3 text-[0.48rem] uppercase tracking-[0.28em] text-accent/80 sm:flex-row sm:justify-between">
+        <p className="text-center sm:text-left">© {year} {siteConfig.name}</p>
+        <nav aria-label="Legal" className="flex flex-wrap items-center justify-center gap-3 sm:justify-end">
           {siteConfig.legalLinks.map((item) => (
             <Link
               key={item.key}
               href={item.href}
-              className="transition-colors hover:text-foreground"
+              className="transition-colors hover:text-accent"
             >
               {navigation(item.key)}
             </Link>

@@ -1,7 +1,4 @@
-import Image from "next/image";
 import { ReactNode } from "react";
-import { siteConfig } from "@/config/site";
-import { Link } from "@/i18n/routing";
 import { HomeBodyFlag } from "@/components/layout/home-body-flag";
 import { cn } from "@/lib/utils";
 
@@ -109,18 +106,6 @@ export function SubpageFrame({
             </div>
           </div>
         </div>
-
-        {siteConfig.brand.logo ? (
-          <Link href="/" className="aer-brand aer-brand--subpage" aria-label={`${siteConfig.name} home`}>
-            <Image
-              src={siteConfig.brand.logo}
-              alt={`${siteConfig.name} logo`}
-              width={240}
-              height={240}
-              className="aer-logo"
-            />
-          </Link>
-        ) : null}
       </div>
     </div>
   );

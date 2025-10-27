@@ -1,5 +1,7 @@
+import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/config/site";
 
 const NAV_ITEMS = [
   { label: "EVENTS", href: "/events" },
@@ -11,20 +13,28 @@ const NAV_ITEMS = [
 export async function Header({ className }: { className?: string }) {
   return (
     <header className={cn("sticky top-0 z-40 bg-background", className)}>
-      <div className="h-2 w-full bg-accent" />
-      <nav className="border-b border-accent bg-background">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-3 px-4 py-4">
+      <div className="h-6 w-full bg-accent" />
+      <div className="bg-background">
+        {siteConfig.brand.logo ? (
+          <Link href="/" className="aer-header-logo" aria-label={`${siteConfig.name} home`}>
+            <Image
+              src={siteConfig.brand.logo}
+              alt={`${siteConfig.name} logo`}
+              width={220}
+              height={220}
+              className="aer-logo"
+              priority
+            />
+          </Link>
+        ) : null}
+        <nav className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-3 px-4 py-5">
           {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="aer-nav-button"
-            >
+            <Link key={item.href} href={item.href} className="aer-nav-button">
               {item.label}
             </Link>
           ))}
-        </div>
-      </nav>
+        </nav>
+      </div>
     </header>
   );
 }
