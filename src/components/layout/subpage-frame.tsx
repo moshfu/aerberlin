@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import { HomeBodyFlag } from "@/components/layout/home-body-flag";
 import { cn } from "@/lib/utils";
 
 interface SubpageFrameProps {
@@ -29,7 +28,6 @@ export function SubpageFrame({
 
   return (
     <div className={cn("aer-root", className)}>
-      <HomeBodyFlag />
       <svg aria-hidden="true" focusable="false" className="aer-noise-defs">
         <defs>
           <filter id="aer-noise">

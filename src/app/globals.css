@@ -32,7 +32,7 @@
     background: var(--color-background);
     font-family: var(--font-body, Inter), system-ui, -apple-system, "Segoe UI", sans-serif;
     min-height: 100vh;
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='36' viewBox='0 0 24 36'%3E%3Cpath fill='%23ff102a' d='M2 2v32l6.6-5.4L14 34l2.6-2.6L12 24l6.6-1.2z'/%3E%3C/svg%3E") 2 2, auto;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath fill='%23ff102a' d='M20 2l6 6 9 1-6.5 6.5L31 29l-11-6-11 6 2.5-13.5L5 9l9-1z'/%3E%3Cpath fill='%23ff7a8d' d='M20 8l4 4 5 .6-3.8 3.8L27 25l-7-3.8L13 25l1.8-8.6L11 12.6l5-.6z'/%3E%3C/svg%3E") 3 3, auto;
   }
 
   body[data-aer-home="true"] .aer-header-logo {
@@ -82,6 +82,12 @@
     background: rgba(255, 16, 42, 0.85);
     color: rgba(255, 16, 42, 0);
     transform: translateY(-1px);
+  }
+
+  .aer-nav-button--compact {
+    padding: 0.45rem 1rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.24em;
   }
 
   .aer-root {
@@ -140,8 +146,10 @@
     justify-content: center;
   }
 
-  .aer-brand--subpage {
-    margin: clamp(3rem, 8vw, 4.5rem) auto clamp(2rem, 6vw, 3.25rem);
+  .aer-header-logo {
+    display: flex;
+    justify-content: center;
+    padding: clamp(1.4rem, 5vw, 2.4rem) 0 0;
   }
 
   .aer-logo {
