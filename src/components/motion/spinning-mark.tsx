@@ -13,9 +13,9 @@ interface SpinningMarkProps {
 }
 
 const ORBIT_TILT_X = 70;
-const ORBIT_TILT_Y = 4;
+const ORBIT_TILT_Y = 3;
 const ORBIT_DURATION_MS = 20_000;
-const LETTER_VERTICAL_SCALE = 1.18;
+const LETTER_VERTICAL_SCALE = 2.3;
 const TEXT_SOURCE = "berlin";
 const LETTER_FONT_SIZE = 36;
 const LETTER_SPACING_EM = 0.8;
@@ -29,7 +29,7 @@ export function SpinningMark({
 }: SpinningMarkProps) {
   const orbitWidth = size * 1.35;
   const orbitHeight = size * 1.02;
-  const orbitOffsetY = 1.22;
+  const orbitOffsetY = 0.22;
   const radiusX = orbitWidth / 2;
   const radiusY = orbitHeight / 2;
 
@@ -92,25 +92,12 @@ export function SpinningMark({
         const normalized = ((angle % 360) + 360) % 360;
         const dataset = node.dataset as DOMStringMap & {
           rotation?: string;
-          front?: "0" | "1";
         };
-
-        let isFront: boolean;
-        if (dataset.front === undefined) {
-          isFront = normalized < 180;
-        } else if (dataset.front === "1") {
-          isFront = normalized <= 200;
-        } else {
-          isFront = normalized < 150;
-        }
-        dataset.front = isFront ? "1" : "0";
+        const isFront = normalized < 180;
 
         const dx = -radiusX * Math.sin(rad);
         const dy = radiusY * Math.cos(rad);
-        let textRotation = (Math.atan2(dy, dx) * 180) / Math.PI;
-        if (isFront) {
-          textRotation += 180;
-        }
+        const textRotation = (Math.atan2(dy, dx) * 180) / Math.PI + 180;
 
         node.style.left = `${centerX + x}px`;
         node.style.top = `${centerY + y}px`;
@@ -127,8 +114,8 @@ export function SpinningMark({
         dataset.rotation = adjustedRotation.toString();
 
         node.style.transform = `translate(-50%, -50%) rotate(${adjustedRotation}deg) scaleY(${LETTER_VERTICAL_SCALE})`;
-        node.style.opacity = isFront ? "0.8" : "0.25";
-        node.style.zIndex = isFront ? "20" : "5";
+        node.style.opacity = isFront ? "0.82" : "0.25";
+        node.style.zIndex = isFront ? "60" : "10";
       }
 
       frame = requestAnimationFrame(animate);
@@ -154,11 +141,11 @@ export function SpinningMark({
       aria-hidden="true"
       style={{ width: orbitWidth, height: orbitHeight }}
     >
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ transform: `rotateX(${ORBIT_TILT_X}deg) rotateY(${ORBIT_TILT_Y}deg)` }}
-      >
-        <div className="relative h-full w-full">
+      <div className="pointer-events-none absolute inset-0">
+        <div
+          className="absolute inset-0"
+          style={{ transform: `rotateX(${ORBIT_TILT_X}deg) rotateY(${ORBIT_TILT_Y}deg)` }}
+        >
           {letters.map(({ char }, index) => (
             <div
               key={`${char}-${index}`}
@@ -179,7 +166,10 @@ export function SpinningMark({
         </div>
       </div>
 
-      <div className="relative z-30 inline-flex items-center justify-center">
+      <div
+        className="relative z-40 inline-flex items-center justify-center"
+        style={{ transform: "translateY(-45px)" }}
+      >
         <Image
           src={resolvedSrc}
           alt={altText}

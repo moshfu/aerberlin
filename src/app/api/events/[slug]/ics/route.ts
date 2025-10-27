@@ -32,7 +32,7 @@ export async function GET(
     summary: event.title,
     description,
     location: [event.venue, event.address].filter(Boolean).join(", "),
-    url: `https://aer.berlin/events/${event.slug}`,
+    url: `https://aerberlin.de/events/${event.slug}`,
   });
 
   const body = calendar.toString();
