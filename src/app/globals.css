@@ -122,14 +122,15 @@
   .aer-content {
     position: relative;
     z-index: 1;
-    min-height: 100vh;
+    min-height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: clamp(6rem, 16vh, 9rem) 1.5rem clamp(4rem, 14vh, 7rem);
-    gap: clamp(3rem, 8vw, 5rem);
+    padding: clamp(0.4rem, 2vh, 1rem) 0.75rem clamp(0.4rem, 2vh, 1rem);
+    gap: clamp(0.5rem, 2vw, 1.25rem);
     text-align: center;
+    margin-top: clamp(-1.5rem, -4vh, -0.75rem);
   }
 
   .aer-content--subpage {
@@ -149,7 +150,7 @@
   .aer-header-logo {
     display: flex;
     justify-content: center;
-    padding: clamp(1.4rem, 5vw, 2.4rem) 0 0;
+    padding: clamp(0.4rem, 2.5vw, 1.1rem) 0 0;
   }
 
   .aer-logo {
@@ -162,7 +163,7 @@
   .aer-header-logo {
     display: flex;
     justify-content: center;
-    padding: clamp(1.6rem, 5vw, 2.6rem) 0 0;
+    padding: clamp(0.4rem, 2.5vw, 1.1rem) 0 0;
   }
 
   .aer-logo--home {
@@ -216,10 +217,11 @@
     white-space: nowrap;
     text-transform: uppercase;
     animation: aer-marquee-scroll 12s linear infinite;
+    animation-direction: reverse;
   }
 
   .aer-marquee--reverse {
-    animation-direction: reverse;
+    animation-direction: normal;
   }
 
   .aer-marquee span {

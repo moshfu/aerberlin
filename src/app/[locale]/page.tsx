@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { siteConfig } from "@/config/site";
 import { HomeBodyFlag } from "@/components/layout/home-body-flag";
+import { SpinningMark } from "@/components/motion/spinning-mark";
 
 const MARQUEE_TEXT = "aerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlinaerberlin";
 
@@ -38,13 +38,11 @@ export default async function HomePage() {
 
       <div className="aer-content">
         {siteConfig.brand.logo ? (
-          <Image
-            src={siteConfig.brand.logo}
-            alt="aer berlin logo"
-            width={420}
-            height={420}
-            priority
+          <SpinningMark
+            size={420}
             className="aer-logo aer-logo--home"
+            imageSrc={siteConfig.brand.logo}
+            imageAlt={`${siteConfig.name} logo`}
           />
         ) : null}
 

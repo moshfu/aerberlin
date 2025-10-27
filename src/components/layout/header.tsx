@@ -1,7 +1,7 @@
-import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
+import { SpinningMark } from "@/components/motion/spinning-mark";
 
 const NAV_ITEMS = [
   { label: "EVENTS", href: "/events" },
@@ -17,13 +17,11 @@ export async function Header({ className }: { className?: string }) {
       <div className="bg-background">
         {siteConfig.brand.logo ? (
           <Link href="/" className="aer-header-logo" aria-label={`${siteConfig.name} home`}>
-            <Image
-              src={siteConfig.brand.logo}
-              alt={`${siteConfig.name} logo`}
-              width={220}
-              height={220}
+            <SpinningMark
+              size={220}
               className="aer-logo"
-              priority
+              imageSrc={siteConfig.brand.logo}
+              imageAlt={`${siteConfig.name} logo`}
             />
           </Link>
         ) : null}
