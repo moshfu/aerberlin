@@ -1,26 +1,627 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --color-background: #000000;
+  --color-surface: #080808;
+  --color-elevated: #111111;
+  --color-border: #1a1a1a;
+  --color-foreground: #f5f5f5;
+  --color-muted: rgba(245, 245, 245, 0.6);
+  --color-muted-soft: rgba(245, 245, 245, 0.18);
+  --color-accent: #ff102a;
+  --color-accent-soft: rgba(255, 16, 42, 0.18);
+  --color-highlight: rgba(255, 16, 42, 0.1);
+  --color-success: #63d471;
+  --color-warning: #f2c94c;
+  --color-danger: #ff3b3b;
+  --shadow-subtle: 0 16px 32px rgba(0, 0, 0, 0.35);
+  --shadow-ambient: 0 24px 48px rgba(0, 0, 0, 0.45);
+  --transition-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    @apply antialiased bg-background text-foreground;
+    background: var(--color-background);
+    font-family: var(--font-body, Inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+    min-height: 100vh;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .aer-root {
+    position: relative;
+    min-height: 100vh;
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .aer-noise-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  .aer-background {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: var(--color-background);
+  }
+
+  .aer-bg-overlay,
+  .aer-vhs-overlay,
+  .aer-noise,
+  .aer-bloom,
+  .aer-marquee-warp {
+    display: none;
+  }
+
+  .aer-content {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(6rem, 16vh, 9rem) 1.5rem clamp(4rem, 14vh, 7rem);
+    gap: clamp(3rem, 8vw, 5rem);
+    text-align: center;
+  }
+
+  .aer-content--subpage {
+    align-items: stretch;
+    justify-content: flex-start;
+    text-align: left;
+    padding-top: clamp(6rem, 14vh, 8.5rem);
+    gap: clamp(3rem, 7vw, 4.5rem);
+  }
+
+  .aer-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aer-logo {
+    width: clamp(160px, 28vw, 320px);
+    height: auto;
+    border-radius: 12px;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .aer-marquee-shell {
+    position: relative;
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1rem, 3vw, 2rem);
+    perspective: 1800px;
+    pointer-events: none;
+  }
+
+  .aer-marquee-row {
+    position: relative;
+    width: 140vw;
+    margin-inline: calc(50% - 70vw);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    transform-style: preserve-3d;
+  }
+
+  .aer-marquee-row--top {
+    opacity: 0.6;
+    transform: rotateX(36deg) translateY(-4vh) translateZ(-220px);
+  }
+
+  .aer-marquee-row--bottom {
+    opacity: 0.6;
+    transform: rotateX(-36deg) translateY(4vh) translateZ(-220px);
+  }
+
+  .aer-marquee-row--main {
+    transform: translateZ(-60px);
+  }
+
+  .aer-marquee {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.4rem, 3vw, 2.4rem);
+    min-width: 100%;
+    white-space: nowrap;
+    text-transform: uppercase;
+    animation: aer-marquee-scroll 12s linear infinite;
+  }
+
+  .aer-marquee--reverse {
+    animation-direction: reverse;
+  }
+
+  .aer-marquee span {
+    font-family: var(--font-display, "Bebas Neue"), sans-serif;
+    font-size: clamp(3.4rem, 9.5vw, 6rem);
+    letter-spacing: 0.06em;
+    line-height: 0.85;
+    color: var(--color-accent);
+    filter: drop-shadow(0 0 18px rgba(255, 16, 42, 0.35));
+  }
+
+  .aer-marquee-row--top .aer-marquee span,
+  .aer-marquee-row--bottom .aer-marquee span {
+    font-size: clamp(2.2rem, 6.2vw, 4.6rem);
+    color: rgba(255, 16, 42, 0.65);
+  }
+
+  .aer-subpage {
+    position: relative;
+    padding: clamp(4.5rem, 10vh, 6.5rem) clamp(1.5rem, 4vw, 3.75rem);
+    background: linear-gradient(180deg, rgba(8, 8, 8, 0.92), rgba(4, 4, 4, 0.96));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .aer-subpage__inner {
+    display: grid;
+    gap: clamp(2.4rem, 5vw, 3.6rem);
+  }
+
+  .aer-subpage__header {
+    display: grid;
+    gap: clamp(1.4rem, 3vw, 2rem);
+  }
+
+  .aer-subpage__title-block {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .aer-subpage__eyebrow {
+    font-size: 0.62rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.52);
+  }
+
+  .aer-subpage__title {
+    font-family: var(--font-display, "Bebas Neue"), sans-serif;
+    font-size: clamp(2.8rem, 6vw, 4.4rem);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 0.9;
+    color: rgba(255, 251, 248, 0.96);
+  }
+
+  .aer-subpage__lede {
+    font-size: clamp(0.85rem, 1.2vw, 1rem);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  .aer-subpage__meta {
+    display: grid;
+    gap: clamp(1rem, 2.4vw, 1.5rem);
+  }
+
+  .aer-subpage__actions,
+  .aer-subpage__aside {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .aer-subpage__body {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 3.8rem);
+  }
+
+  .aer-subpage__footer {
+    margin-top: 2.4rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  .aer-grid {
+    display: grid;
+    gap: clamp(2rem, 4vw, 3rem);
+  }
+
+  .aer-grid--two {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+
+  .aer-grid--three {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .aer-panel {
+    background: var(--color-surface);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: var(--shadow-subtle);
+    padding: clamp(1.75rem, 4vw, 2.4rem);
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .aer-panel__meta {
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.48);
+  }
+
+  .aer-panel__heading {
+    font-family: var(--font-display, "Bebas Neue"), sans-serif;
+    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .aer-panel__content {
+    display: grid;
+    gap: 1rem;
+    color: rgba(245, 245, 245, 0.82);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .aer-list {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .aer-list__item {
+    display: grid;
+    gap: 0.45rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.02);
+    transition: border-color 160ms ease, transform 160ms ease;
+  }
+
+  .aer-list__item:hover {
+    border-color: rgba(255, 16, 42, 0.45);
+    transform: translateY(-2px);
+  }
+
+  .aer-list__label {
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.52);
+  }
+
+  .aer-list__value {
+    font-size: 0.92rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .aer-tag-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .aer-tag-strip span {
+    display: inline-flex;
+    padding: 0.32rem 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+  }
+
+  .aer-social-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(1rem, 3vw, 1.8rem);
+  }
+
+  .aer-social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.6rem;
+    border: 1px solid rgba(255, 16, 42, 0.4);
+    background: rgba(255, 16, 42, 0.15);
+    font-size: 0.68rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    transition: background-color 160ms ease, border-color 160ms ease;
+  }
+
+  .aer-social-links a:hover,
+  .aer-social-links a:focus-visible {
+    border-color: rgba(255, 16, 42, 0.75);
+    background: rgba(255, 16, 42, 0.25);
+  }
+
+  .aer-artist {
+    display: grid;
+    gap: 1.2rem;
+    padding: 1.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(12, 12, 12, 0.92);
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .aer-artist__headline {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .aer-artist__intro {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .aer-artist__thumb {
+    position: relative;
+    display: inline-flex;
+    width: 96px;
+    height: 96px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 16, 42, 0.14);
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    letter-spacing: 0.24em;
+  }
+
+  .aer-artist__thumb img {
+    object-fit: cover;
+  }
+
+  .aer-artist__cta {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .aer-release {
+    display: grid;
+    gap: 1.5rem;
+    padding: 1.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(12, 12, 12, 0.9);
+  }
+
+  .aer-release__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  .aer-release__cover {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+  }
+
+  .aer-release__cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .aer-release__meta {
+    display: grid;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.68);
+  }
+
+  .aer-release__embeds {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .aer-ticket {
+    display: grid;
+    gap: 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(12, 12, 12, 0.9);
+  }
+
+  .aer-ticket__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    font-size: 0.68rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .aer-ticket__status--ok {
+    border-color: rgba(99, 212, 113, 0.45);
+    color: #63d471;
+  }
+
+  .aer-ticket__status--warning {
+    border-color: rgba(242, 201, 76, 0.45);
+    color: #f2c94c;
+  }
+
+  .aer-ticket__status--danger {
+    border-color: rgba(255, 16, 42, 0.45);
+    color: var(--color-accent);
+  }
+
+  .aer-ticket__price {
+    font-family: var(--font-display, "Bebas Neue"), sans-serif;
+    font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+    letter-spacing: 0.1em;
+  }
+
+  .aer-ticket__meta {
+    display: grid;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .aer-ticket__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.1rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 16, 42, 0.16);
+    font-size: 0.72rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+  }
+
+  .aer-ticket-shop {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .aer-cart {
+    display: grid;
+    gap: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 1.5rem;
+    background: rgba(12, 12, 12, 0.9);
+  }
+
+  .aer-cart__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .aer-cart__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .aer-cart__label {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .aer-cart__list {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .aer-cart__empty {
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.48);
+  }
+
+  .aer-cart__price {
+    font-size: 0.95rem;
+    font-family: var(--font-display, "Bebas Neue"), sans-serif;
+    letter-spacing: 0.1em;
+  }
+
+  .aer-cart__controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .aer-cart__icon {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .aer-cart__quantity {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+  }
+
+  .aer-cart__count {
+    font-size: 0.85rem;
+    min-width: 2rem;
+    text-align: center;
+    letter-spacing: 0.12em;
+  }
+
+  .aer-cart__title {
+    font-family: var(--font-display, "Bebas Neue"), sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .aer-cart__total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .aer-cart__checkout {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid rgba(255, 16, 42, 0.55);
+    background: rgba(255, 16, 42, 0.18);
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+
+  .aer-cart__hint {
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+@keyframes aer-marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
