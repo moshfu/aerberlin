@@ -156,8 +156,7 @@ export function SpinningMark({
                 fontSize: `${LETTER_FONT_SIZE}px`,
                 letterSpacing: `${LETTER_SPACING_EM}em`,
                 WebkitTextStroke: `${LETTER_STROKE_WEIGHT}px rgba(255, 255, 255, 0.75)`,
-                textShadow:
-                  "0 0 12px rgba(255, 255, 255, 0.45), 0 0 4px rgba(255, 255, 255, 0.35)",
+                textShadow: "none",
               }}
             >
               {char}

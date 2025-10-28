@@ -108,7 +108,11 @@
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    background: var(--color-background);
+    background-color: var(--color-background);
+    background-image: var(--hero-background-image, url("/media/hero-backdrop.jpg"));
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
   .aer-bg-overlay,
