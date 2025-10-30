@@ -8,11 +8,11 @@ import { SubpageFrame } from "@/components/layout/subpage-frame";
 import { siteConfig } from "@/config/site";
 import { urlFor } from "@/lib/sanity.server";
 import { getEventBySlug, getEvents } from "@/server/sanity";
-import { absoluteUrl, formatDateTime } from "@/lib/utils";
+import { absoluteUrl, formatDateTime, cn } from "@/lib/utils";
 import type { SanityEvent } from "@/lib/sanity.types";
 
 interface EventPageProps {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }
 
 export const revalidate = 120;
@@ -28,12 +28,13 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
-  const event = await getEventBySlug(params.slug);
+  const { locale, slug } = await params;
+  const event = await getEventBySlug(slug);
   if (!event) {
     return {};
   }
   const title = `${event.title} · ${siteConfig.name}`;
-  const description = `${event.title} @ ${event.venue ?? "TBA"} – ${formatDateTime(event.start, params.locale, {
+  const description = `${event.title} @ ${event.venue ?? "TBA"} – ${formatDateTime(event.start, locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -66,7 +67,8 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
   };
 }
 
-export default async function EventPage({ params: { locale, slug } }: EventPageProps) {
+export default async function EventPage({ params }: EventPageProps) {
+  const { locale, slug } = await params;
   const event = await getEventBySlug(slug);
   if (!event) {
     notFound();
@@ -92,43 +94,105 @@ export default async function EventPage({ params: { locale, slug } }: EventPageP
       })
     : null;
 
-  const marquee = `${event.title.toUpperCase()} // ${formatDateTime(event.start, locale, {
-    day: "2-digit",
-    month: "short",
-  }).toUpperCase()} ${new Date(event.start).getFullYear()}`;
+  const marquee =
+    event.marqueeText ??
+    `${event.title.toUpperCase()} // ${formatDateTime(event.start, locale, {
+      day: "2-digit",
+      month: "short",
+    }).toUpperCase()} ${new Date(event.start).getFullYear()}`;
 
-  const ticketLinks = [
-    !soldOut && event.ticketingSource !== "external"
-      ? {
+  type ActionLink = {
+    label: string;
+    href?: string;
+    external?: boolean;
+    disabled?: boolean;
+    className?: string;
+  };
+
+  const buyTicketsLink: ActionLink | null =
+    event.ticketingSource === "external"
+      ? event.externalTicketUrl
+        ? {
+            label: general("buyTickets"),
+            href: event.externalTicketUrl,
+            external: true,
+            disabled: soldOut,
+            className: "event-action-link event-purchase-link",
+          }
+        : null
+      : {
           label: general("buyTickets"),
           href: `/tickets?event=${event.slug}`,
           external: false,
-        }
-      : null,
-    event.ticketingSource === "external" && event.externalTicketUrl
-      ? {
-          label: general("buyTickets"),
-          href: event.externalTicketUrl,
-          external: true,
-        }
-      : null,
-    {
-      label: "Add to calendar",
-      href: `/api/events/${event.slug}/ics`,
-      external: false,
-    },
-  ].filter((link): link is { label: string; href: string; external: boolean } => Boolean(link));
+          disabled: soldOut,
+          className: "event-action-link event-purchase-link",
+        };
 
   const navigation = siteConfig.navigation.map((item) => ({
     href: item.href,
     label: navT(item.key),
   }));
 
+  const renderActionLink = (link: ActionLink) => {
+    const key = `${link.label}-${link.href ?? "noop"}`;
+    const baseClasses = cn(
+      "aer-nav-button aer-nav-button--compact event-action-link",
+      link.className,
+      link.disabled && "is-disabled",
+    );
+
+    if (link.disabled || !link.href) {
+      return (
+        <span key={key} className={baseClasses} aria-disabled="true">
+          {link.label}
+        </span>
+      );
+    }
+
+    const isInternalRoute = !link.external && link.href.startsWith("/");
+
+    if (isInternalRoute) {
+      return (
+        <Link key={key} href={link.href} className={baseClasses}>
+          {link.label}
+        </Link>
+      );
+    }
+
+    return (
+      <a
+        key={key}
+        href={link.href}
+        target={link.external ? "_blank" : undefined}
+        rel={link.external ? "noreferrer" : undefined}
+        className={baseClasses}
+      >
+        {link.label}
+      </a>
+    );
+  };
+
+  const backLink: ActionLink = {
+    label: general("backToEvents"),
+    href: "/events",
+    external: false,
+    className: "event-back-link",
+  };
+
+  const heroLinks: ActionLink[] = [backLink];
+  if (buyTicketsLink) {
+    heroLinks.push({ ...buyTicketsLink });
+  }
+  // Calendar link intentionally omitted per requirements
+
+  const accessLinks: ActionLink[] = buyTicketsLink
+    ? [{ ...buyTicketsLink }]
+    : [{ label: general("soldOut"), disabled: true }];
+
   return (
     <>
       <SubpageFrame
         title={event.title}
-        eyebrow="Event"
         description={
           <p>
             {startStamp}
@@ -137,123 +201,100 @@ export default async function EventPage({ params: { locale, slug } }: EventPageP
         }
         marqueeText={marquee}
         navigation={navigation}
-        meta={
-          event.tags?.length ? (
-            <div className="aer-tag-strip">
-              {event.tags.map((tag) => (
-                <span key={tag}>{tag}</span>
-              ))}
-            </div>
+        actions={
+          heroLinks.length ? (
+            <div className="event-head-actions flex flex-wrap gap-3">{heroLinks.map(renderActionLink)}</div>
           ) : null
         }
-        actions={
-          <div className="flex flex-wrap gap-3">
-            {ticketLinks.map((link) =>
-              link.external ? (
-                <a key={link.href} href={link.href} target="_blank" rel="noreferrer" className="aer-rail__cta">
-                  {link.label}
-                  <span aria-hidden="true">↗</span>
-                </a>
-              ) : (
-                <Link key={link.href} href={link.href} className="aer-rail__cta">
-                  {link.label}
-                  <span aria-hidden="true">↗</span>
-                </Link>
-              ),
-            )}
-          </div>
-        }
-        footnote="Event data mirrors Sanity + Pretix. Times are local (CET)."
       >
-        <div className="aer-grid aer-grid--two">
-          <div className="aer-grid">
-            {event.poster?.asset ? (
-              <figure className="aer-poster">
-                <Image
-                  src={urlFor(event.poster).width(1400).height(1800).quality(85).url()}
-                  alt={event.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 520px"
-                />
-                {soldOut ? <span className="aer-poster__badge">{general("soldOut")}</span> : null}
-              </figure>
-            ) : null}
-            <div className="aer-list">
-              <div className="aer-list__item">
-                <span className="aer-list__label">Start</span>
-                <span className="aer-list__value">{startStamp}</span>
-              </div>
-              {endStamp ? (
-                <div className="aer-list__item">
-                  <span className="aer-list__label">End</span>
-                  <span className="aer-list__value">{endStamp}</span>
-                </div>
-              ) : null}
-              {event.venue ? (
-                <div className="aer-list__item">
-                  <span className="aer-list__label">Venue</span>
-                  <span className="aer-list__value">{event.venue}</span>
-                </div>
-              ) : null}
-              {event.address ? (
-                <div className="aer-list__item">
-                  <span className="aer-list__label">Address</span>
-                  <span className="aer-list__value">{event.address}</span>
-                </div>
-              ) : null}
-            </div>
-          </div>
-          <article className="aer-panel">
-            <div className="aer-panel__meta">Details</div>
-            <PortableTextContent value={event.description} className="aer-panel__content space-y-4" />
-          </article>
-        </div>
-
-        {event.lineup?.length ? (
-          <section className="aer-panel">
-            <div className="aer-panel__meta">Line-up</div>
-            <div className="aer-list">
-              {event.lineup.map((artist) => (
-                <Link key={artist._id} href={`/artists/${artist.slug}`} className="aer-list__item">
-                  <span className="aer-list__label">Artist</span>
-                  <span className="aer-list__value">{artist.name}</span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        <section className="aer-panel">
-          <div className="aer-panel__meta">Access</div>
-          <div className="flex flex-wrap gap-3">
-            {ticketLinks.map((link) =>
-              link.external ? (
-                <a key={link.href} href={link.href} target="_blank" rel="noreferrer" className="aer-rail__cta">
-                  {link.label}
-                  <span aria-hidden="true">↗</span>
-                </a>
-              ) : (
-                <Link key={link.href} href={link.href} className="aer-rail__cta">
-                  {link.label}
-                  <span aria-hidden="true">↗</span>
-                </Link>
-              ),
-            )}
-          </div>
-          {event.address ? (
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                `${event.venue ?? ""} ${event.address ?? ""}`,
-              )}`}
-              target="_blank"
-              rel="noreferrer"
-              className="aer-rail__cta mt-4"
-            >
-              Open map
-              <span aria-hidden="true">↗</span>
-            </a>
+        <div className="event-detail">
+          {event.poster?.asset ? (
+            <figure className="aer-poster event-detail__poster">
+              <Image
+                src={urlFor(event.poster).width(1400).height(1800).quality(85).url()}
+                alt={event.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 520px"
+              />
+              {soldOut ? <span className="aer-poster__badge">{general("soldOut")}</span> : null}
+            </figure>
           ) : null}
-        </section>
+
+          <div className="event-detail__panels">
+            <section className="aer-panel event-detail__panel">
+              <div className="aer-panel__meta">Schedule</div>
+              <div className="aer-list aer-list--grid-square">
+                <div className="aer-list__item">
+                  <span className="aer-list__label">Start</span>
+                  <span className="aer-list__value">{startStamp}</span>
+                </div>
+                {endStamp ? (
+                  <div className="aer-list__item">
+                    <span className="aer-list__label">End</span>
+                    <span className="aer-list__value">{endStamp}</span>
+                  </div>
+                ) : null}
+                {event.venue ? (
+                  <div className="aer-list__item">
+                    <span className="aer-list__label">Venue</span>
+                    <span className="aer-list__value">{event.venue}</span>
+                  </div>
+                ) : null}
+                {event.address ? (
+                  <div className="aer-list__item">
+                    <span className="aer-list__label">Address</span>
+                    <span className="aer-list__value">{event.address}</span>
+                  </div>
+                ) : null}
+              </div>
+            </section>
+            <article id="event-details" className="aer-panel event-detail__panel">
+              <div className="aer-panel__meta">Details</div>
+              <PortableTextContent value={event.description} className="aer-panel__content space-y-4" />
+            </article>
+
+            {(accessLinks.length || event.address || event.ageLimit) ? (
+              <section className="aer-panel event-detail__panel">
+                <div className="aer-panel__meta">Access</div>
+                <div className="event-detail__actions">
+                  {accessLinks.map(renderActionLink)}
+                  {event.address ? (
+                    <a
+                      className="aer-nav-button aer-nav-button--compact event-action-link event-map-link"
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        `${event.venue ?? ""} ${event.address ?? ""}`,
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {general("openMap")}
+                    </a>
+                  ) : null}
+                  {event.ageLimit ? (
+                    <span className="event-access-age">
+                      <span className="event-access-age__label">Age limit</span>
+                      <span className="event-access-age__value">{event.ageLimit}</span>
+                    </span>
+                  ) : null}
+                </div>
+              </section>
+            ) : null}
+
+            {event.lineup?.length ? (
+              <section className="aer-panel event-detail__panel">
+                <div className="aer-panel__meta">Line-up</div>
+                <div className="aer-list aer-list--grid-square">
+                  {event.lineup.map((artist) => (
+                    <Link key={artist._id} href={`/artists/${artist.slug}`} className="aer-list__item">
+                      <span className="aer-list__label">{artist.role ?? "Artist"}</span>
+                      <span className="aer-list__value">{artist.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </div>
+        </div>
       </SubpageFrame>
 
       <StructuredData event={event} />

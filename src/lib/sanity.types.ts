@@ -30,6 +30,7 @@ export interface SanityEvent {
     lat: number;
     lng: number;
   };
+  marqueeText?: string;
   description: PortableTextBlock[];
   poster?: SanityImage;
   gallery?: SanityImage[];
@@ -59,6 +60,10 @@ export interface SanityArtist {
   name: string;
   slug: string;
   role?: string;
+  shortDescription?: string;
+  marqueeText?: string;
+  nameSize?: number;
+  nameStretchY?: number;
   tags?: string[];
   portrait?: SanityImage;
   gallery?: SanityImage[];
@@ -68,6 +73,13 @@ export interface SanityArtist {
     asset: { _ref: string; _type: "reference" };
     url?: string;
   };
+  featuredReleases?: Array<{
+    title?: string;
+    url?: string;
+    platform?: "spotify" | "soundcloud" | "bandcamp" | "youtube" | "external";
+    release?: SanityRelease;
+  }>;
+  featuredReleaseUrl?: string; // deprecated single URL
 }
 
 export interface Track {

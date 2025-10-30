@@ -4,21 +4,21 @@ export const siteConfig = {
   defaultLocale: "en" as const,
   locales: ["en"] as const,
   description:
-    "aer berlin curates transcendent trance experiences across Berlin — immersive nights, forward-thinking lineups, and inclusive dancefloors.",
+    "AER BERLIN: Precise sets. Heavy sound. Open floor.",
   brand: {
-    tagline: "immersive trance collective",
+    tagline: "LIVE. CAPTURED. ARCHIVED.",
     accent: "#FF102A",
     logo: "/media/aer-logo.jpg",
   },
   social: {
     instagram: "https://instagram.com/aer.berlin",
-    soundcloud: "https://soundcloud.com/aerberlin",
+    soundcloud: "https://soundcloud.com/aer-berlin",
     bandcamp: "https://aerberlin.bandcamp.com",
-    spotify: "https://open.spotify.com/user/aerberlin",
+    spotify: "",
     youtube: "https://youtube.com/@aerberlin",
-    tiktok: "https://www.tiktok.com/@aerberlin",
+    tiktok: "",
   },
-  contactEmail: "admin@aerberlin.de",
+  contactEmail: "support@aerberlin.de",
   navigation: [
     { key: "events", href: "/events" },
     { key: "artists", href: "/artists" },

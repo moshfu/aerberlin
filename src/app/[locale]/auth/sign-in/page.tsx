@@ -11,22 +11,27 @@ export default function SignInPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "sent">("idle");
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setStatus("loading");
-    const result = await signIn("email", {
+    setErrorMessage(null);
+    const result = await signIn("credentials", {
       email,
+      password,
       redirect: false,
       callbackUrl,
     });
-    if (result?.ok) {
-      setStatus("sent");
-    } else {
-      setStatus("idle");
-      alert("Unable to send sign-in link. Please try again.");
+    if (result?.ok && !result.error) {
+      router.push(callbackUrl);
+      router.refresh();
+      return;
     }
+    setStatus("error");
+    setErrorMessage(result?.error ?? "Invalid credentials. Try again.");
   };
 
   return (
@@ -40,33 +45,46 @@ export default function SignInPage() {
             Secure access
           </h1>
           <p className="mt-3 text-[0.72rem] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.55)]">
-            Request a one-time link to open the operations console.
+            Enter the admin credentials to open the operations console.
           </p>
         </div>
         <div className="aer-panel w-full max-w-md">
-          {status === "sent" ? (
-            <p className="text-[0.72rem] uppercase tracking-[0.24em] text-[rgba(255,255,255,0.6)]">
-              Link sent — check your inbox and this tab can be closed.
-            </p>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <label className="flex flex-col gap-2 text-left">
-                <span className="text-[0.62rem] uppercase tracking-[0.26em] text-[rgba(255,255,255,0.6)]">
-                  Admin email
-                </span>
-                <Input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="you@example.com"
-                />
-              </label>
-              <Button type="submit" variant="primary" disabled={status === "loading"}>
-                {status === "loading" ? "Sending…" : "Send login link"}
-              </Button>
-            </form>
-          )}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <label className="flex flex-col gap-2 text-left">
+              <span className="text-[0.62rem] uppercase tracking-[0.26em] text-[rgba(255,255,255,0.6)]">
+                Admin email
+              </span>
+              <Input
+                type="email"
+                autoComplete="username"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="admin@aerberlin.de"
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-left">
+              <span className="text-[0.62rem] uppercase tracking-[0.26em] text-[rgba(255,255,255,0.6)]">
+                Password
+              </span>
+              <Input
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="••••••••••••••"
+              />
+            </label>
+            {status === "error" && errorMessage ? (
+              <p className="text-[0.68rem] uppercase tracking-[0.2em] text-[rgba(255,16,42,0.7)]">
+                {errorMessage}
+              </p>
+            ) : null}
+            <Button type="submit" variant="primary" disabled={status === "loading"}>
+              {status === "loading" ? "Signing in…" : "Sign in"}
+            </Button>
+          </form>
           <Button variant="ghost" onClick={() => router.push(callbackUrl)} className="mt-4">
             Cancel
           </Button>

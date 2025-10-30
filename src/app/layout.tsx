@@ -20,8 +20,8 @@ const body = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://aer.berlin"),
   title: {
-    default: `${siteConfig.name} – ${siteConfig.brand.tagline}`,
-    template: `%s | ${siteConfig.name}`,
+    default: "AER BERLIN",
+    template: `%s | AER BERLIN`,
   },
   description: siteConfig.description,
   keywords: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   ],
   applicationName: siteConfig.name,
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.svg",
     apple: "/apple-touch-icon.png",
   },
   openGraph: {

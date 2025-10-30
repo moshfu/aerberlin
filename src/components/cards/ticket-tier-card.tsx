@@ -55,11 +55,13 @@ export function TicketTierCard({ tier, locale, onAdd, disabled }: TicketTierCard
       <Button
         disabled={isDisabled}
         onClick={onAdd && !isDisabled ? () => onAdd(tier) : undefined}
-        variant={soldOut ? "outline" : "primary"}
-        className={cn("aer-ticket__cta justify-between px-5", soldOut && "text-[rgba(255,255,255,0.35)]")}
+        variant="ghost"
+        className={cn(
+          "aer-ticket__cta aer-nav-button aer-nav-button--compact w-full justify-center",
+          soldOut && "is-disabled",
+        )}
       >
-        <span>{soldOut ? "Sold out" : disabled ? "Unavailable" : "Add to cart"}</span>
-        {!soldOut && <span className="text-[0.68rem] uppercase tracking-[0.18em]">→</span>}
+        {soldOut ? "Sold out" : disabled ? "Unavailable" : "Add to cart"}
       </Button>
     </div>
   );

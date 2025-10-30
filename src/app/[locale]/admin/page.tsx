@@ -1,24 +1,29 @@
-import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { redirect } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
 import { getEvents, getReleases } from "@/server/sanity";
 import { getPretixEvents } from "@/server/pretix";
 import { siteConfig } from "@/config/site";
+import { AdminConsole } from "@/components/admin/admin-console";
 
 export const revalidate = 120;
 
 export default async function AdminDashboard({
-  params: { locale },
+  params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const session = await auth();
   if (!session?.user) {
-    redirect(`/${locale}/auth/sign-in?callbackUrl=/${locale}/admin`);
+    redirect({
+      href: { pathname: "/auth/sign-in", query: { callbackUrl: "/admin" } },
+      locale,
+    });
   }
-  if (!["ADMIN", "EDITOR"].includes(session.user.role)) {
-    redirect(`/${locale}`);
+  if (session.user.role !== "ADMIN") {
+    redirect({ href: "/", locale });
   }
 
   const [events, releases, pretix, navT] = await Promise.all([
@@ -45,16 +50,18 @@ export default async function AdminDashboard({
   return (
     <SubpageFrame
       title="Operations dashboard"
-      eyebrow="Admin"
       description={<p>Realtime snapshot across Pretix, Sanity and Stripe.</p>}
       marqueeText="AER BERLIN // ADMIN // OPERATIONS"
       footnote="Data refreshes every 120 seconds."
       navigation={navigation}
     >
-      <div className="aer-grid aer-grid--three">
-        {metrics.map((metric) => (
-          <MetricCard key={metric.title} {...metric} />
-        ))}
+      <div className="space-y-8">
+        <div className="aer-grid aer-grid--three">
+          {metrics.map((metric) => (
+            <MetricCard key={metric.title} {...metric} />
+          ))}
+        </div>
+        <AdminConsole />
       </div>
     </SubpageFrame>
   );

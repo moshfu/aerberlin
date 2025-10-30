@@ -13,6 +13,12 @@ export const event = defineType({
     defineField({ name: "address", type: "string", title: "Address" }),
     defineField({ name: "geo", type: "geopoint", title: "Geo coordinates" }),
     defineField({
+      name: "marqueeText",
+      type: "string",
+      title: "Marquee text (moving band)",
+      description: "Optional custom text for the animated marquee on the event page. Defaults to the event title + date.",
+    }),
+    defineField({
       name: "description",
       title: "Description",
       type: "array",

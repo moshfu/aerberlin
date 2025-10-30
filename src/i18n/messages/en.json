@@ -1,7 +1,7 @@
 {
   "general": {
     "brand": "aer berlin",
-    "tagline": "immersive trance collective",
+    "tagline": "LIVE. CAPTURED. ARCHIVED.",
     "viewAll": "View all",
     "buyTickets": "Buy ticket",
     "soldOut": "Sold out",
@@ -9,6 +9,9 @@
     "newsletterCta": "Join the newsletter",
     "submit": "Submit",
     "checkout": "Checkout",
+    "backToEvents": "Back to events",
+    "addToCalendar": "Add to calendar",
+    "openMap": "Open map",
     "total": "Total",
     "close": "Close",
     "loading": "Loading...",
@@ -51,7 +54,7 @@
   },
   "tickets": {
     "title": "Tickets",
-    "instructions": "Secure your spot via Pretix with secure EU-compliant checkout.",
+    "instructions": "Select an event to view live ticket availability.",
     "cart": "Cart",
     "total": "Total",
     "checkout": "Checkout"

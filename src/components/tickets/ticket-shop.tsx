@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Loader2Icon, MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
+import Link from "next/link";
 import { TicketTierCard } from "@/components/cards/ticket-tier-card";
 import { Button } from "@/components/ui/button";
 import type { TicketCatalog, TicketTier } from "@/types/ticket";
@@ -131,7 +132,7 @@ export function TicketShop({
   }
 
   return (
-    <div className="aer-grid aer-grid--two aer-ticket-shop">
+    <div className="aer-grid aer-ticket-shop">
       <div className="aer-grid">
         {catalog.products.map((tier) => (
           <TicketTierCard
@@ -217,6 +218,13 @@ export function TicketShop({
             "Checkout disabled in demo"
           )}
         </Button>
+        <p className="text-[0.62rem] uppercase tracking-[0.26em] text-[rgba(255,255,255,0.6)]">
+          By proceeding you agree to our house guidelines and
+          <Link href="/terms" className="ml-1 text-accent underline underline-offset-4">
+            terms and conditions
+          </Link>
+          .
+        </p>
         {!checkoutEnabled ? (
           <p className="aer-cart__hint">Connect Pretix and Stripe credentials to enable live checkout.</p>
         ) : null}

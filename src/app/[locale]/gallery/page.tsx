@@ -30,7 +30,6 @@ export default async function GalleryPage({
   return (
     <SubpageFrame
       title={t("title")}
-      eyebrow="Archive"
       description={<p>Nightscapes, strobes and analog film from the aer berlin orbit.</p>}
       marqueeText="GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//"
       navigation={navigation}
@@ -75,7 +74,7 @@ function FilterLink({
   return (
     <Link
       href={{ pathname: "/gallery", query: { tag: value } }}
-      className={cn(active && "is-active")}
+      className={cn("aer-nav-button aer-nav-button--compact", active && "is-active")}
     >
       {label}
     </Link>

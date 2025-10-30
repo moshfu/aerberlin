@@ -1,13 +1,13 @@
 import Script from "next/script";
 import { env } from "@/lib/env";
 
-export function Analytics() {
+export function Analytics({ allowAnalytics }: { allowAnalytics: boolean }) {
   const plausibleEnabled = env.NEXT_PUBLIC_PLAUSIBLE_ENABLED === "true" && env.PLAUSIBLE_DOMAIN;
   const gaEnabled = env.NEXT_PUBLIC_GA4_ENABLED === "true" && env.GA4_MEASUREMENT_ID && env.GA4_API_SECRET;
 
   return (
     <>
-      {plausibleEnabled ? (
+      {allowAnalytics && plausibleEnabled ? (
         <Script
           defer
           data-domain={env.PLAUSIBLE_DOMAIN}
@@ -16,7 +16,7 @@ export function Analytics() {
             : `${env.PLAUSIBLE_DOMAIN}/js/script.tagged-events.js`}
         />
       ) : null}
-      {gaEnabled ? (
+      {allowAnalytics && gaEnabled ? (
         <>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${env.GA4_MEASUREMENT_ID}`}

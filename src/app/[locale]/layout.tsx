@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { AppProviders } from "@/components/providers/app-providers";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
@@ -9,6 +10,8 @@ import { Locale } from "@/config/site";
 import { auth } from "@/lib/auth";
 import { Analytics } from "@/components/analytics/analytics";
 import { AdminMenu } from "@/components/admin/admin-menu";
+import { parseCookieConsent, COOKIE_CONSENT_COOKIE } from "@/lib/cookie-consent";
+import { CookieBanner } from "@/components/cookie-consent/cookie-banner";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -21,9 +24,9 @@ export default async function LocaleLayout({
   params,
 }: {
   children: ReactNode;
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 }) {
-  const { locale } = params;
+  const { locale } = await params;
 
   if (!locales.includes(locale)) {
     notFound();
@@ -37,6 +40,9 @@ export default async function LocaleLayout({
   }
 
   const session = await auth();
+  const cookieStore = cookies();
+  const consentCookie = cookieStore.get(COOKIE_CONSENT_COOKIE)?.value;
+  const allowAnalytics = parseCookieConsent(consentCookie) === "analytics";
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
@@ -45,8 +51,9 @@ export default async function LocaleLayout({
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
-          <Analytics />
+          <Analytics allowAnalytics={allowAnalytics} />
           <AdminMenu />
+          <CookieBanner />
         </div>
       </AppProviders>
     </NextIntlClientProvider>

@@ -22,11 +22,12 @@ export default async function ArtistsPage({
 
   const filter = typeof searchParams.filter === "string" ? searchParams.filter : "all";
   const filtered = artists.filter((artist) => {
+    const role = artist.role?.toLowerCase();
     if (filter === "residents") {
-      return artist.tags?.some((tag) => tag.toLowerCase().includes("resident"));
+      return role === "resident";
     }
     if (filter === "guests") {
-      return artist.tags?.some((tag) => tag.toLowerCase().includes("guest"));
+      return role === "guest";
     }
     return true;
   });
@@ -43,19 +44,17 @@ export default async function ArtistsPage({
   return (
     <SubpageFrame
       title={t("title")}
-      eyebrow="Roster"
       marqueeText="// ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS //"
-      description={<p>Residents, guests and sonic conspirators shaping the aer berlin orbit.</p>}
+      description={<p>Residents. Guest. Sonic conspirators.</p>}
       navigation={navigation}
       actions={
-        <nav className="aer-chipset" aria-label="Artist filters">
+        <nav className="aer-chipset flex flex-wrap gap-3" aria-label="Artist filters">
           <FilterLink label={t("filters.all")} value="all" active={filter === "all"} />
           <FilterLink label={t("filters.residents")} value="residents" active={filter === "residents"} />
           <FilterLink label={t("filters.guests")} value="guests" active={filter === "guests"} />
           <FilterLink label={t("filters.a-z")} value="a-z" active={filter === "a-z"} />
         </nav>
       }
-      footnote={`${sorted.length} artist profiles. Data syncs directly from Sanity.`}
     >
       <div className="aer-grid aer-grid--two">
         {sorted.map((artist) => (
@@ -66,19 +65,15 @@ export default async function ArtistsPage({
   );
 }
 
-function FilterLink({
-  label,
-  value,
-  active,
-}: {
-  label: string;
-  value: string;
-  active: boolean;
-}) {
+function FilterLink({ label, value, active }: { label: string; value: string; active: boolean }) {
   return (
     <Link
-      href={{ pathname: "/artists", query: { filter: value } }}
-      className={cn(active && "is-active")}
+      href={
+        value === "all"
+          ? { pathname: "/artists" }
+          : { pathname: "/artists", query: { filter: value } }
+      }
+      className={cn("aer-nav-button aer-nav-button--compact", active && "is-active")}
     >
       {label}
     </Link>
@@ -93,41 +88,48 @@ function ArtistTile({
   readMoreLabel: string;
 }) {
   const portrait = artist.portrait?.asset
-    ? urlFor(artist.portrait).width(480).height(600).quality(75).url()
+    ? urlFor(artist.portrait).width(560).height(700).quality(80).url()
     : null;
 
+  // Heuristic: auto scale X based on name length if no manual size provided
+  const nameLength = artist.name.length;
+  const autoScaleX = Math.max(0.7, Math.min(1.6, 18 / Math.max(8, nameLength)));
+  const scaleX = Math.min(1.6, Math.max(0.6, artist.nameSize ?? autoScaleX));
+  const scaleY = Math.min(1.6, Math.max(1, artist.nameStretchY ?? 1.25));
   return (
     <article className="aer-panel aer-artist">
       <header className="aer-artist__headline">
         <div className="aer-artist__intro">
-          <span className="aer-panel__meta">
-            {artist.role ?? "aer berlin"}
-          </span>
-          <h3 className="aer-panel__heading">{artist.name}</h3>
+          <h3
+            className="aer-artist__name"
+            style={{
+              transform: `scale(${scaleX}, ${scaleY})`,
+              transformOrigin: "left top",
+              width: `${(1 / scaleX) * 100}%`,
+            }}
+          >
+            {artist.name}
+          </h3>
+          {artist.shortDescription ? (
+            <p className="aer-artist__desc">{artist.shortDescription}</p>
+          ) : null}
         </div>
-        <Link href={`/artists/${artist.slug}`} className="aer-artist__thumb">
-          {portrait ? (
-            <Image src={portrait} alt={artist.name} fill sizes="120px" />
-          ) : (
-            <span>{artist.name.slice(0, 3).toUpperCase()}</span>
-          )}
-        </Link>
+        <div className="aer-artist__media">
+          <Link href={`/artists/${artist.slug}`} className="aer-artist__thumb">
+            {portrait ? (
+              <Image src={portrait} alt={artist.name} fill sizes="180px" />
+            ) : (
+              <span>{artist.name.slice(0, 3).toUpperCase()}</span>
+            )}
+          </Link>
+          <Link
+            href={`/artists/${artist.slug}`}
+            className="aer-nav-button aer-nav-button--compact aer-artist__readmore"
+          >
+            {readMoreLabel}
+          </Link>
+        </div>
       </header>
-
-      {artist.tags?.length ? (
-        <div className="aer-tag-strip">
-          {artist.tags.map((tag) => (
-            <span key={tag}>{tag}</span>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="aer-artist__cta">
-        <Link href={`/artists/${artist.slug}`} className="aer-rail__cta">
-          {readMoreLabel}
-          <span aria-hidden="true">↗</span>
-        </Link>
-      </div>
     </article>
   );
 }

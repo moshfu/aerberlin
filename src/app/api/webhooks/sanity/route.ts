@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { env } from "@/lib/env";
+import { siteConfig } from "@/config/site";
 
 export async function POST(request: Request) {
   const signature = request.headers.get("x-sanity-signature");
@@ -12,16 +13,18 @@ export async function POST(request: Request) {
   const docType = body?.type;
   const slug = body?.slug;
 
-  const locales = ["en", "de"];
+  const localePrefixes = siteConfig.locales.map((locale) =>
+    locale === siteConfig.defaultLocale ? "" : `/${locale}`,
+  );
 
   if (docType === "event" && slug) {
-    locales.forEach((locale) => revalidatePath(`/${locale}/events/${slug}`));
+    localePrefixes.forEach((prefix) => revalidatePath(`${prefix}/events/${slug}`));
   }
   if (docType === "artist" && slug) {
-    locales.forEach((locale) => revalidatePath(`/${locale}/artists/${slug}`));
+    localePrefixes.forEach((prefix) => revalidatePath(`${prefix}/artists/${slug}`));
   }
   if (docType === "release" || docType === "event" || docType === "galleryItem") {
-    locales.forEach((locale) => revalidatePath(`/${locale}`));
+    localePrefixes.forEach((prefix) => revalidatePath(prefix === "" ? "/" : prefix));
   }
 
   return NextResponse.json({ revalidated: true });

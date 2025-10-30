@@ -6,11 +6,7 @@ import { MediaEmbed } from "@/components/media/media-embed";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
 import { siteConfig } from "@/config/site";
 
-export default async function MusicPage({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
+export default async function MusicPage() {
   const [t, navT] = await Promise.all([
     getTranslations("music"),
     getTranslations("navigation"),
@@ -24,36 +20,23 @@ export default async function MusicPage({
   return (
     <SubpageFrame
       title={t("title")}
-      eyebrow="Catalog"
-      description={<p>Hypersonic trance transmissions, archived drops, live edits.</p>}
+      description={<p>LIVE. CAPTURED. ARCHIVED.</p>}
       marqueeText="// MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC //"
-      footnote={`${releases.length} releases indexed from Sanity.`}
       navigation={navigation}
     >
-      <div className="aer-grid">
+      <div className="aer-grid aer-grid--two">
         {releases.map((release) => (
           <article key={release._id} className="aer-release aer-panel">
-            <div className="aer-release__header">
-              {release.cover?.asset ? (
-                <figure className="aer-release__cover">
-                  <Image
-                    src={urlFor(release.cover).width(800).height(800).quality(85).url()}
-                    alt={release.title}
-                    fill
-                    sizes="(max-width: 768px) 40vw, 240px"
-                  />
-                </figure>
-              ) : null}
-              <div className="aer-release__meta">
-                <span className="aer-panel__meta">
-                  {new Intl.DateTimeFormat(locale, {
-                    month: "long",
-                    year: "numeric",
-                  }).format(new Date(release.date))}
-                </span>
-                <h2 className="aer-panel__heading">{release.title}</h2>
-              </div>
-            </div>
+            {release.cover?.asset ? (
+              <figure className="aer-release__cover w-full">
+                <Image
+                  src={urlFor(release.cover).width(1000).height(1000).quality(85).url()}
+                  alt={release.title}
+                  fill
+                  sizes="(max-width: 1200px) 50vw, 560px"
+                />
+              </figure>
+            ) : null}
             <div className="aer-release__embeds">
               {release.links?.soundcloud ? (
                 <MediaEmbed url={release.links.soundcloud} title={release.title} />

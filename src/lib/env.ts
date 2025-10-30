@@ -43,6 +43,8 @@ export const env = createEnv({
     USE_MOCK_PRETIX: z.enum(["true", "false"]).default("true"),
     USE_MOCK_STRIPE: z.enum(["true", "false"]).default("true"),
     USE_MOCK_AUTH: z.enum(["true", "false"]).default("true"),
+    ADMIN_EMAIL: z.string().email().default("admin@aerberlin.de"),
+    ADMIN_PASSWORD_HASH: z.string().min(20).default("$2b$10$RphLhq.bJ8videy6SE2fdulmnnzpeei.wn4vIyr8WiPd.9FmM8hDa"),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z
@@ -87,6 +89,8 @@ export const env = createEnv({
     USE_MOCK_PRETIX: process.env.USE_MOCK_PRETIX,
     USE_MOCK_STRIPE: process.env.USE_MOCK_STRIPE,
     USE_MOCK_AUTH: process.env.USE_MOCK_AUTH,
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    ADMIN_PASSWORD_HASH: process.env.ADMIN_PASSWORD_HASH,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_SANITY_PROJECT_ID: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
     NEXT_PUBLIC_SANITY_DATASET: process.env.NEXT_PUBLIC_SANITY_DATASET,

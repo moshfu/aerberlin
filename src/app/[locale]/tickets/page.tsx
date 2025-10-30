@@ -9,12 +9,13 @@ import { SubpageFrame } from "@/components/layout/subpage-frame";
 import { siteConfig } from "@/config/site";
 
 export default async function TicketsPage({
-  params: { locale },
+  params,
   searchParams,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
   searchParams: Record<string, string | string[] | undefined>;
 }) {
+  const { locale } = await params;
   const [t, general, navT] = await Promise.all([
     getTranslations("tickets"),
     getTranslations("general"),
@@ -62,8 +63,6 @@ export default async function TicketsPage({
   return (
     <SubpageFrame
       title={t("title")}
-      eyebrow="Access"
-      description={<p>{t("instructions")}</p>}
       marqueeText="TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//"
       navigation={navigation}
       actions={
@@ -73,7 +72,10 @@ export default async function TicketsPage({
               <Link
                 key={event._id}
                 href={{ pathname: "/tickets", query: { event: event.slug } }}
-                className={cn(selectedEvent?.slug === event.slug && "is-active")}
+                className={cn(
+                  "aer-nav-button aer-nav-button--compact",
+                  selectedEvent?.slug === event.slug && "is-active",
+                )}
               >
                 {event.title}
               </Link>
@@ -83,7 +85,7 @@ export default async function TicketsPage({
       }
       footnote={
         checkoutEnabled
-          ? "Live checkout enabled via Pretix."
+          ? undefined
           : "Demo mode — add a Pretix event id in Sanity to activate checkout."
       }
     >
@@ -97,7 +99,7 @@ export default async function TicketsPage({
             catalog={catalog}
             locale={locale}
             checkoutLabel={general("checkout")}
-            emptyLabel={t("instructions")}
+            emptyLabel=""
             totalLabel={general("total")}
             successRedirectLabel="Redirecting to secure checkout"
             checkoutEnabled={checkoutEnabled}

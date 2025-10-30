@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { siteConfig } from "@/config/site";
 import { Link } from "@/i18n/routing";
+import { CookiePreferencesTrigger } from "@/components/cookie-consent/cookie-banner";
 
 export async function Footer() {
   const year = new Date().getFullYear();
@@ -21,6 +22,9 @@ export async function Footer() {
               {navigation(item.key)}
             </Link>
           ))}
+          <CookiePreferencesTrigger className="aer-nav-button aer-nav-button--compact">
+            Cookie settings
+          </CookiePreferencesTrigger>
         </nav>
       </div>
     </footer>
