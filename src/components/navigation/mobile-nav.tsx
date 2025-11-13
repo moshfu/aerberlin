@@ -35,7 +35,7 @@ export function MobileNav({ items }: MobileNavProps) {
       <SheetContent side="right">
         <div className="flex h-full flex-col gap-10 pt-12">
           <div className="space-y-2">
-            <p className="font-display text-2xl uppercase tracking-tight">
+            <p className="font-display text-2xl tracking-tight">
               {siteConfig.name}
             </p>
             <p className="text-sm text-muted">{siteConfig.description}</p>

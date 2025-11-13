@@ -7,7 +7,7 @@ export default function LocaleNotFound() {
       <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
         404
       </p>
-      <h1 className="font-display text-4xl uppercase tracking-tightest">
+      <h1 className="font-display text-4xl tracking-tightest">
         Signal lost in the void.
       </h1>
       <p className="max-w-xl text-sm text-muted-foreground">

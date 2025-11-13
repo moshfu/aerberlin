@@ -3,33 +3,27 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    NODE_ENV: z.enum(["development", "test", "production"]).default(
-      "development",
-    ),
-    DATABASE_URL: z
-      .string()
-      .url()
-      .default("postgresql://user:password@localhost:5432/aerberlin"),
-    SANITY_PROJECT_ID: z.string().default("dummy"),
-    SANITY_DATASET: z.string().default("production"),
-    SANITY_API_VERSION: z.string().default("2023-10-01"),
-    SANITY_PREVIEW_SECRET: z.string().default("sanity-preview-secret"),
+    NODE_ENV: z
+      .enum(["development", "test", "production"])
+      .default("development"),
+    DATABASE_URL: z.string().url(),
+    SANITY_PROJECT_ID: z.string().min(1),
+    SANITY_DATASET: z.string().min(1),
+    SANITY_API_VERSION: z.string().min(1),
+    SANITY_PREVIEW_SECRET: z.string().min(1),
     SANITY_WRITE_TOKEN: z.string().optional(),
-    PRETIX_API_TOKEN: z.string().default("pretix-token"),
-    PRETIX_API_URL: z
-      .string()
-      .url()
-      .default("https://pretix.invalid/api/v1/organizers/aerberlin"),
-    PRETIX_WEBHOOK_SECRET: z.string().default("pretix-webhook-secret"),
-    PRETIX_CHECKIN_LIST_ID: z.string().default("1"),
-    STRIPE_SECRET_KEY: z.string().default("sk_test_placeholder"),
-    STRIPE_PUBLISHABLE_KEY: z.string().default("pk_test_placeholder"),
-    STRIPE_WEBHOOK_SECRET: z.string().default("whsec_placeholder"),
-    NEXTAUTH_SECRET: z.string().default("development-nextauth-secret"),
-    EMAIL_SERVER_HOST: z.string().default("localhost"),
-    EMAIL_SERVER_PORT: z.coerce.number().default(1025),
-    EMAIL_SERVER_USER: z.string().default("user@example.com"),
-    EMAIL_SERVER_PASSWORD: z.string().default("password"),
+    PRETIX_API_TOKEN: z.string().min(1),
+    PRETIX_API_URL: z.string().url(),
+    PRETIX_WEBHOOK_SECRET: z.string().min(1),
+    PRETIX_CHECKIN_LIST_ID: z.string().min(1),
+    STRIPE_SECRET_KEY: z.string().min(1),
+    STRIPE_PUBLISHABLE_KEY: z.string().min(1),
+    STRIPE_WEBHOOK_SECRET: z.string().min(1),
+    NEXTAUTH_SECRET: z.string().min(1),
+    EMAIL_SERVER_HOST: z.string().min(1),
+    EMAIL_SERVER_PORT: z.coerce.number(),
+    EMAIL_SERVER_USER: z.string().min(1),
+    EMAIL_SERVER_PASSWORD: z.string().min(1),
     BUTTONDOWN_API_KEY: z.string().optional(),
     BUTTONDOWN_AUDIENCE_ID: z.string().optional(),
     MAILCHIMP_API_KEY: z.string().optional(),
@@ -37,14 +31,16 @@ export const env = createEnv({
     PLAUSIBLE_DOMAIN: z.string().optional(),
     GA4_MEASUREMENT_ID: z.string().optional(),
     GA4_API_SECRET: z.string().optional(),
-    PRETIX_ORGANIZER_SLUG: z.string().default("aerberlin"),
+    PRETIX_ORGANIZER_SLUG: z.string().min(1),
     PRETIX_EVENT_SERIES_SLUG: z.string().optional(),
     USE_MOCK_SANITY: z.enum(["true", "false"]).default("true"),
     USE_MOCK_PRETIX: z.enum(["true", "false"]).default("true"),
     USE_MOCK_STRIPE: z.enum(["true", "false"]).default("true"),
     USE_MOCK_AUTH: z.enum(["true", "false"]).default("true"),
-    ADMIN_EMAIL: z.string().email().default("admin@aerberlin.de"),
-    ADMIN_PASSWORD_HASH: z.string().min(20).default("$2b$10$RphLhq.bJ8videy6SE2fdulmnnzpeei.wn4vIyr8WiPd.9FmM8hDa"),
+    ADMIN_EMAIL: z.string().email(),
+    ADMIN_PASSWORD_HASH: z.string().min(20),
+    PREVIEW_USER: z.string().optional(),
+    PREVIEW_PASS: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z
@@ -91,6 +87,8 @@ export const env = createEnv({
     USE_MOCK_AUTH: process.env.USE_MOCK_AUTH,
     ADMIN_EMAIL: process.env.ADMIN_EMAIL,
     ADMIN_PASSWORD_HASH: process.env.ADMIN_PASSWORD_HASH,
+    PREVIEW_USER: process.env.PREVIEW_USER,
+    PREVIEW_PASS: process.env.PREVIEW_PASS,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_SANITY_PROJECT_ID: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
     NEXT_PUBLIC_SANITY_DATASET: process.env.NEXT_PUBLIC_SANITY_DATASET,

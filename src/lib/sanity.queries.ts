@@ -12,6 +12,8 @@ export const eventFields = `{
   marqueeText,
   ticketingSource,
   pretixEventId,
+  pretixTicketShopUrl,
+  ticketSalesOpen,
   externalTicketUrl,
   tags,
   ageLimit,

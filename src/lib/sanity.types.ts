@@ -36,6 +36,8 @@ export interface SanityEvent {
   gallery?: SanityImage[];
   ticketingSource: "pretix" | "external";
   pretixEventId?: string;
+  pretixTicketShopUrl?: string;
+  ticketSalesOpen?: boolean;
   externalTicketUrl?: string;
   lineup?: SanityArtist[];
   tags?: string[];

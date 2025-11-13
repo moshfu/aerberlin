@@ -305,7 +305,7 @@ export default async function AboutPage() {
   return (
     <SubpageFrame
       title={t("title")}
-      marqueeText="ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//ABOUT//"
+      marqueeText="// ABOUT// ABOUT// ABOUT// ABOUT// ABOUT// ABOUT// ABOUT// ABOUT // ABOUT// ABOUT// ABOUT// ABOUT"
       description={<p>{description}</p>}
     >
       <div className="aer-social-links" aria-label="aer berlin social channels">

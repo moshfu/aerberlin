@@ -7,38 +7,44 @@ import { siteConfig } from "@/config/site";
 
 interface SpinningMarkProps {
   size?: number;
+  orbitScale?: number;
+  offsetX?: number;
   className?: string;
   imageSrc?: string | null;
   imageAlt?: string;
 }
 
-const ORBIT_TILT_X = 70;
-const ORBIT_TILT_Y = 3;
+const ORBIT_TILT_X = 71;
+const ORBIT_TILT_Y = -3.5;
 const ORBIT_DURATION_MS = 20_000;
-const LETTER_VERTICAL_SCALE = 2.3;
+const LETTER_VERTICAL_SCALE = 3.0;
 const TEXT_SOURCE = "berlin";
 const LETTER_FONT_SIZE = 36;
-const LETTER_SPACING_EM = 0.8;
-const LETTER_STROKE_WEIGHT = 1.6;
+const LETTER_SPACING_EM = 1.8;
+const LETTER_STROKE_WEIGHT = 1.2;
 
 export function SpinningMark({
   size = 64,
+  orbitScale = 1,
+  offsetX = 0,
   className,
   imageSrc,
   imageAlt,
 }: SpinningMarkProps) {
-  const orbitWidth = size * 1.35;
-  const orbitHeight = size * 1.02;
-  const orbitOffsetY = 0.22;
+  const normalizedOrbitScale = Math.max(0.4, orbitScale);
+  const orbitWidth = size * 1.35 * normalizedOrbitScale;
+  const orbitHeight = size * 1.02 * normalizedOrbitScale;
+  const orbitOffsetY = 0.22 * normalizedOrbitScale;
   const radiusX = orbitWidth / 2;
   const radiusY = orbitHeight / 2;
+  const letterFontSize = LETTER_FONT_SIZE * normalizedOrbitScale;
 
   const approximateCircumference =
     Math.PI *
     (3 * (radiusX + radiusY) -
       Math.sqrt((3 * radiusX + radiusY) * (radiusX + 3 * radiusY)));
   const estimatedLetterAdvance =
-    LETTER_FONT_SIZE * (1 + LETTER_SPACING_EM * 2);
+    letterFontSize * (1 + LETTER_SPACING_EM * 2);
   const wordAdvance = estimatedLetterAdvance * TEXT_SOURCE.length;
   const repeats = Math.max(8, Math.ceil(approximateCircumference / wordAdvance));
 
@@ -139,7 +145,10 @@ export function SpinningMark({
         className,
       )}
       aria-hidden="true"
-      style={{ width: orbitWidth, height: orbitHeight }}
+      style={{
+        width: orbitWidth,
+        height: orbitHeight,
+      }}
     >
       <div className="pointer-events-none absolute inset-0">
         <div
@@ -150,10 +159,10 @@ export function SpinningMark({
             <div
               key={`${char}-${index}`}
               ref={setLetterRef(index)}
-              className="absolute left-0 top-0 select-none font-display text-white will-change-transform"
+              className="spinning-mark__letter absolute left-0 top-0 select-none text-white will-change-transform"
               style={{
                 transformOrigin: "center",
-                fontSize: `${LETTER_FONT_SIZE}px`,
+                fontSize: `${letterFontSize}px`,
                 letterSpacing: `${LETTER_SPACING_EM}em`,
                 WebkitTextStroke: `${LETTER_STROKE_WEIGHT}px rgba(255, 255, 255, 0.75)`,
                 textShadow: "none",
@@ -167,7 +176,9 @@ export function SpinningMark({
 
       <div
         className="relative z-40 inline-flex items-center justify-center"
-        style={{ transform: "translateY(-45px)" }}
+        style={{
+          transform: `translate(${offsetX}px, ${-45 * normalizedOrbitScale}px)`,
+        }}
       >
         <Image
           src={resolvedSrc}

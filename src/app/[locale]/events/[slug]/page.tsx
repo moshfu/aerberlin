@@ -79,6 +79,9 @@ export default async function EventPage({ params }: EventPageProps) {
   ]);
 
   const soldOut = event.tags?.some((tag) => tag.toLowerCase().includes("sold"));
+  const now = new Date();
+  const cutoffDate = new Date(event.end ?? event.start);
+  const ticketSalesActive = event.ticketSalesOpen !== false && cutoffDate >= now;
   const startStamp = formatDateTime(event.start, locale, {
     weekday: "long",
     day: "2-digit",
@@ -109,24 +112,26 @@ export default async function EventPage({ params }: EventPageProps) {
     className?: string;
   };
 
-  const buyTicketsLink: ActionLink | null =
-    event.ticketingSource === "external"
-      ? event.externalTicketUrl
-        ? {
-            label: general("buyTickets"),
-            href: event.externalTicketUrl,
-            external: true,
-            disabled: soldOut,
-            className: "event-action-link event-purchase-link",
-          }
-        : null
-      : {
-          label: general("buyTickets"),
-          href: `/tickets?event=${event.slug}`,
-          external: false,
-          disabled: soldOut,
-          className: "event-action-link event-purchase-link",
-        };
+  let buyTicketsLink: ActionLink | null = null;
+  if (ticketSalesActive) {
+    if (event.ticketingSource === "external" && event.externalTicketUrl) {
+      buyTicketsLink = {
+        label: general("buyTickets"),
+        href: event.externalTicketUrl,
+        external: true,
+        disabled: soldOut,
+        className: "event-action-link event-purchase-link",
+      };
+    } else if (event.ticketingSource === "pretix" && event.pretixTicketShopUrl) {
+      buyTicketsLink = {
+        label: general("buyTickets"),
+        href: event.pretixTicketShopUrl,
+        external: true,
+        disabled: soldOut,
+        className: "event-action-link event-purchase-link",
+      };
+    }
+  }
 
   const navigation = siteConfig.navigation.map((item) => ({
     href: item.href,

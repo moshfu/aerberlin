@@ -26,6 +26,8 @@ const buttonVariants = cva(
       variant: {
         primary:
           "cta-glint border-accent/50 bg-accent text-background shadow-[0_0_28px_rgba(255,16,42,0.35)] hover:shadow-[0_0_38px_rgba(255,16,42,0.45)]",
+        accent:
+          "cta-glint border-accent/50 bg-accent text-background shadow-[0_0_28px_rgba(255,16,42,0.35)] hover:shadow-[0_0_38px_rgba(255,16,42,0.45)]",
         secondary:
           "border-[rgba(243,243,243,0.16)] bg-[rgba(18,18,18,0.85)] text-foreground hover:border-accent/45",
         outline:

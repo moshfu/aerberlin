@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 interface SubpageFrameProps {
@@ -11,6 +12,7 @@ interface SubpageFrameProps {
   meta?: ReactNode;
   footnote?: ReactNode;
   className?: string;
+  navigation?: Array<{ href: string; label: string }>;
 }
 
 export function SubpageFrame({
@@ -21,10 +23,11 @@ export function SubpageFrame({
   actions,
   meta,
   footnote,
+  navigation,
   className,
   children,
 }: SubpageFrameProps) {
-  const text = (marqueeText ?? `${title} — ${title} — ${title}`).toUpperCase();
+  const text = marqueeText ?? `${title} — ${title} — ${title}`;
 
   return (
     <div className={cn("aer-root", className)}>
@@ -77,6 +80,20 @@ export function SubpageFrame({
                 </div>
               )}
             </header>
+
+            {navigation?.length ? (
+              <nav className="aer-subpage__nav" aria-label="Section navigation">
+                {navigation.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="aer-nav-button aer-nav-button--compact"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            ) : null}
 
             <div className="aer-subpage__body">{children}</div>
 

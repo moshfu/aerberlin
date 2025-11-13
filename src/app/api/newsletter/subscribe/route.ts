@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { env } from "@/lib/env";
+import { rateLimit } from "@/lib/rate-limit";
 
 const schema = z.object({
   email: z.string().email(),
@@ -10,6 +11,23 @@ const schema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const limitCheck = rateLimit(request, {
+      limit: 5,
+      windowMs: 60_000,
+      keyPrefix: "newsletter",
+    });
+    if (!limitCheck.success) {
+      return NextResponse.json(
+        { message: "Too many requests" },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(limitCheck.retryAfter ?? 60),
+          },
+        },
+      );
+    }
+
     const body = await request.json();
     const { email, locale } = schema.parse(body);
 

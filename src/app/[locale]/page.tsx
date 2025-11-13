@@ -39,7 +39,8 @@ export default async function HomePage() {
       <div className="aer-content">
         {siteConfig.brand.logo ? (
           <SpinningMark
-            size={420}
+            size={720}
+            orbitScale={0.85}
             className="aer-logo aer-logo--home"
             imageSrc={siteConfig.brand.logo}
             imageAlt={`${siteConfig.name} logo`}

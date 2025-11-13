@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import type { Route } from "next";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,9 @@ import { Input } from "@/components/ui/input";
 export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  const rawCallbackUrl = searchParams.get("callbackUrl");
+  const callbackUrl = rawCallbackUrl && rawCallbackUrl.startsWith("/") ? rawCallbackUrl : "/";
+  const callbackRoute = callbackUrl as Route;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
@@ -26,7 +29,7 @@ export default function SignInPage() {
       callbackUrl,
     });
     if (result?.ok && !result.error) {
-      router.push(callbackUrl);
+      router.push(callbackRoute);
       router.refresh();
       return;
     }
@@ -39,20 +42,20 @@ export default function SignInPage() {
       <div className="aer-subpage__inner flex min-h-[60vh] flex-col items-center justify-center gap-10 py-12">
         <div className="text-center">
           <p className="text-[0.62rem] uppercase tracking-[0.32em] text-[rgba(255,255,255,0.55)]">
-            aer berlin admin
+            aer berlin access
           </p>
-          <h1 className="mt-3 font-display text-[2.8rem] uppercase tracking-[0.08em] text-[rgba(255,255,255,0.92)]">
+          <h1 className="mt-3 font-display text-[2.8rem] tracking-[0.08em] text-[rgba(255,255,255,0.92)]">
             Secure access
           </h1>
           <p className="mt-3 text-[0.72rem] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.55)]">
-            Enter the admin credentials to open the operations console.
+            Sign in with staff credentials to unlock the restricted tools.
           </p>
         </div>
         <div className="aer-panel w-full max-w-md">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <label className="flex flex-col gap-2 text-left">
               <span className="text-[0.62rem] uppercase tracking-[0.26em] text-[rgba(255,255,255,0.6)]">
-                Admin email
+                Work email
               </span>
               <Input
                 type="email"
@@ -60,7 +63,7 @@ export default function SignInPage() {
                 required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="admin@aerberlin.de"
+                placeholder="crew@aerberlin.de"
               />
             </label>
             <label className="flex flex-col gap-2 text-left">
@@ -85,7 +88,7 @@ export default function SignInPage() {
               {status === "loading" ? "Signing in…" : "Sign in"}
             </Button>
           </form>
-          <Button variant="ghost" onClick={() => router.push(callbackUrl)} className="mt-4">
+          <Button variant="ghost" onClick={() => router.push(callbackRoute)} className="mt-4">
             Cancel
           </Button>
         </div>

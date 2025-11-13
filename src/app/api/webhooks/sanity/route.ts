@@ -2,14 +2,37 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { env } from "@/lib/env";
 import { siteConfig } from "@/config/site";
+import { verifyHmacSignature } from "@/lib/webhook-signature";
+
+const SANITY_SIGNATURE_HEADER = "x-sanity-signature";
+const SANITY_SIGNATURE_ALGORITHMS = ["sha1", "sha256"] as const;
 
 export async function POST(request: Request) {
-  const signature = request.headers.get("x-sanity-signature");
-  if (signature !== env.SANITY_PREVIEW_SECRET) {
+  const signatureHeader = request.headers.get(SANITY_SIGNATURE_HEADER);
+  const rawBody = await request.text();
+
+  if (
+    !signatureHeader ||
+    !verifyHmacSignature({
+      header: signatureHeader,
+      payload: rawBody,
+      secret: env.SANITY_PREVIEW_SECRET,
+      algorithms: SANITY_SIGNATURE_ALGORITHMS,
+    })
+  ) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
+  let body: { type?: string; slug?: string } | null = null;
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ message: "Invalid payload" }, { status: 400 });
+  }
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ message: "Invalid payload" }, { status: 400 });
+  }
+
   const docType = body?.type;
   const slug = body?.slug;
 

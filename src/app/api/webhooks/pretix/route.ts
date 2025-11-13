@@ -1,14 +1,38 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { env } from "@/lib/env";
+import { verifyHmacSignature } from "@/lib/webhook-signature";
+
+const PRETIX_SIGNATURE_HEADER = "x-pretix-signature";
+const PRETIX_SIGNATURE_ALGORITHMS = ["sha256", "sha1"] as const;
 
 export async function POST(request: Request) {
-  const signature = request.headers.get("x-pretix-signature");
-  if (!signature || signature !== env.PRETIX_WEBHOOK_SECRET) {
+  const signatureHeader = request.headers.get(PRETIX_SIGNATURE_HEADER);
+  const rawBody = await request.text();
+
+  if (
+    !signatureHeader ||
+    !verifyHmacSignature({
+      header: signatureHeader,
+      payload: rawBody,
+      secret: env.PRETIX_WEBHOOK_SECRET,
+      algorithms: PRETIX_SIGNATURE_ALGORITHMS,
+    })
+  ) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const payload = await request.json();
+  let payload: unknown;
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ message: "Invalid payload" }, { status: 400 });
+  }
+
+  if (!isPretixPayload(payload)) {
+    return NextResponse.json({ message: "Unsupported payload" }, { status: 400 });
+  }
+
   const action = payload?.action;
 
   if (action === "order.created") {
@@ -39,4 +63,15 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ success: true });
+}
+
+type PretixPayload = {
+  action?: string;
+  order?: { code?: string; email?: string };
+  checkin?: { lists?: Array<{ position?: string }>; position?: string };
+  event?: string;
+};
+
+function isPretixPayload(payload: unknown): payload is PretixPayload {
+  return typeof payload === "object" && payload !== null;
 }

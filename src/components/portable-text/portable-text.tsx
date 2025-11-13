@@ -4,6 +4,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { urlFor } from "@/lib/sanity.server";
 
+const SAFE_LINK_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"]);
+
 const components: Partial<PortableTextReactComponents> = {
   types: {
     image: ({ value }) => {
@@ -29,12 +31,12 @@ const components: Partial<PortableTextReactComponents> = {
   },
   block: {
     h2: ({ children }) => (
-      <h2 className="mt-10 font-display text-3xl uppercase tracking-tightest">
+      <h2 className="mt-10 font-display text-3xl tracking-tightest">
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="mt-8 font-display text-2xl uppercase tracking-tightest">
+      <h3 className="mt-8 font-display text-2xl tracking-tightest">
         {children}
       </h3>
     ),
@@ -51,12 +53,17 @@ const components: Partial<PortableTextReactComponents> = {
   },
   marks: {
     link: ({ children, value }) => {
-      const rel = !value.href.startsWith("/") ? "noreferrer noopener" : undefined;
+      const href = sanitizePortableHref(value.href);
+      if (!href) {
+        return <span>{children}</span>;
+      }
+      const isExternal = href.startsWith("http");
+      const rel = isExternal ? "noreferrer noopener" : undefined;
       return (
         <a
-          href={value.href}
+          href={href}
           rel={rel}
-          target={rel ? "_blank" : undefined}
+          target={isExternal ? "_blank" : undefined}
           className="underline underline-offset-4"
         >
           {children}
@@ -94,4 +101,25 @@ export function PortableTextContent({
       <PortableText value={value} components={components} />
     </div>
   );
+}
+
+function sanitizePortableHref(rawHref?: string | null) {
+  if (!rawHref) return null;
+  const href = rawHref.trim();
+  if (!href) return null;
+  if (href.startsWith("/") || href.startsWith("#")) {
+    return href;
+  }
+  if (href.startsWith("//")) {
+    return SAFE_LINK_PROTOCOLS.has("https:") ? `https:${href}` : null;
+  }
+  try {
+    const parsed = new URL(href);
+    if (SAFE_LINK_PROTOCOLS.has(parsed.protocol)) {
+      return parsed.toString();
+    }
+  } catch {
+    // Ignore parse errors – treat as unsafe
+  }
+  return null;
 }

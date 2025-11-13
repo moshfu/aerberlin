@@ -53,6 +53,19 @@ export const event = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({ name: "pretixEventId", title: "Pretix Event ID", type: "string" }),
+    defineField({
+      name: "pretixTicketShopUrl",
+      title: "Pretix Ticket Shop URL",
+      type: "url",
+      description: "Public Pretix ticket purchase link (e.g. https://pretix.eu/org/event/).",
+    }),
+    defineField({
+      name: "ticketSalesOpen",
+      title: "Ticket sales open",
+      type: "boolean",
+      initialValue: true,
+      description: "Disable to hide Buy Tickets buttons without unpublishing the event.",
+    }),
     defineField({ name: "externalTicketUrl", title: "External Ticket URL", type: "url" }),
     defineField({
       name: "lineup",

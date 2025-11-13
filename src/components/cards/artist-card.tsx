@@ -33,7 +33,7 @@ export function ArtistCard({ artist, readMoreLabel }: ArtistCardProps) {
       </Link>
       <div className="flex flex-col gap-4 p-5">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-display text-[1.8rem] uppercase leading-[0.92]">
+          <h3 className="font-display text-[1.8rem] leading-[0.92]">
             {artist.name}
           </h3>
           {artist.role ? <Badge variant="muted">{artist.role}</Badge> : null}

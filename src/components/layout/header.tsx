@@ -18,7 +18,8 @@ export async function Header({ className }: { className?: string }) {
         {siteConfig.brand.logo ? (
           <Link href="/" className="aer-header-logo" aria-label={`${siteConfig.name} home`}>
             <SpinningMark
-              size={220}
+              size={520}
+              orbitScale={0.72}
               className="aer-logo"
               imageSrc={siteConfig.brand.logo}
               imageAlt={`${siteConfig.name} logo`}

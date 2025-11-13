@@ -29,7 +29,7 @@ export function CardTitle({
 }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={cn("font-display text-2xl uppercase tracking-[-0.02em]", className)}
+      className={cn("font-display text-2xl tracking-[-0.02em]", className)}
       {...props}
     />
   );

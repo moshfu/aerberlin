@@ -34,7 +34,7 @@ export function ReleaseCard({ release, title, ctaLabel }: ReleaseCardProps) {
           <p className="text-[0.66rem] uppercase tracking-[0.26em] text-muted">
             {title}
           </p>
-          <h3 className="font-display text-[2.15rem] uppercase leading-[0.94]">
+          <h3 className="font-display text-[2.15rem] leading-[0.94]">
             {release.title}
           </h3>
           {release.date ? (

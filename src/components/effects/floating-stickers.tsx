@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, type CSSProperties } from "react";
+
+type StickerStyle = CSSProperties & {
+  [key: `--${string}`]: string | number | undefined;
+};
 
 interface StickerSeed {
   id: number;
@@ -92,20 +96,23 @@ export function FloatingStickers() {
       aria-hidden="true"
       className="floating-stickers pointer-events-none hidden lg:block"
     >
-      {seeds.map((seed) => (
-        <div
-          key={seed.id}
-          data-sticker
-          className={`floating-sticker floating-sticker--${seed.type}`}
-          style={{
-            left: `${seed.left}vw`,
-            top: `${seed.top}vh`,
-            width: `${seed.size}px`,
-            height: `${seed.size}px`,
-            ["--sticker-scale" as const]: (seed.depth + 0.7).toFixed(2),
-          }}
-        />
-      ))}
+      {seeds.map((seed) => {
+        const stickerStyle: StickerStyle = {
+          left: `${seed.left}vw`,
+          top: `${seed.top}vh`,
+          width: `${seed.size}px`,
+          height: `${seed.size}px`,
+          "--sticker-scale": (seed.depth + 0.7).toFixed(2),
+        };
+        return (
+          <div
+            key={seed.id}
+            data-sticker
+            className={`floating-sticker floating-sticker--${seed.type}`}
+            style={stickerStyle}
+          />
+        );
+      })}
     </div>
   );
 }

@@ -8,7 +8,7 @@ export default function VerifyEmailPage() {
         <p className="text-[0.62rem] uppercase tracking-[0.32em] text-[rgba(255,255,255,0.55)]">
           Check your inbox
         </p>
-        <h1 className="font-display text-[2.8rem] uppercase tracking-[0.08em] text-[rgba(255,255,255,0.92)]">
+        <h1 className="font-display text-[2.8rem] tracking-[0.08em] text-[rgba(255,255,255,0.92)]">
           Magic link sent
         </h1>
         <p className="max-w-md text-[0.72rem] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.55)]">

@@ -70,7 +70,7 @@ export function EventCard({
               .filter(Boolean)
               .join(" • ")}
           </p>
-          <h3 className="font-display text-[2.35rem] uppercase leading-[0.92]">
+          <h3 className="font-display text-[2.35rem] leading-[0.92]">
             {event.title}
           </h3>
           <div className="text-[0.74rem] uppercase tracking-[0.2em] text-muted">

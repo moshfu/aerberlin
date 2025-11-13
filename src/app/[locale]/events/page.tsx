@@ -5,14 +5,16 @@ import type { SanityEvent } from "@/lib/sanity.types";
 import { cn, formatDateTime } from "@/lib/utils";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
 
+export const dynamic = "force-dynamic";
+
 export default async function EventsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { locale } = await params;
+  const [{ locale }, search] = await Promise.all([params, searchParams]);
   const [t, general] = await Promise.all([
     getTranslations("events"),
     getTranslations("general"),
@@ -23,7 +25,10 @@ export default async function EventsPage({
   const upcoming = events.filter((event) => new Date(event.start) >= now);
   const past = events.filter((event) => new Date(event.start) < now);
 
-  const status = typeof searchParams.status === "string" ? searchParams.status : "upcoming";
+  const statusParam = Array.isArray(search.status)
+    ? search.status[0]
+    : search.status;
+  const status = statusParam === "past" ? "past" : "upcoming";
   const description = "Schedule. Archive.";
 
   // Top navigation not shown on this page

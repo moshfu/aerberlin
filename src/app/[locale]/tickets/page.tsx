@@ -1,10 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { TicketShop } from "@/components/tickets/ticket-shop";
 import { getEvents } from "@/server/sanity";
-import { getPretixCatalog } from "@/server/pretix";
-import type { TicketCatalog } from "@/types/ticket";
-import { cn } from "@/lib/utils";
+import { cn, formatDateTime } from "@/lib/utils";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
 import { siteConfig } from "@/config/site";
 
@@ -22,38 +19,25 @@ export default async function TicketsPage({
     getTranslations("navigation"),
   ]);
 
-  const events = (await getEvents()).filter((event) => event.pretixEventId);
+  const now = new Date();
+  const events = (await getEvents()).filter((event) => {
+    if (event.ticketingSource !== "pretix") return false;
+    if (!event.pretixTicketShopUrl) return false;
+    if (event.ticketSalesOpen === false) return false;
+    const cutoff = new Date(event.end ?? event.start);
+    return cutoff >= now;
+  });
   const requestedSlug = typeof searchParams.event === "string" ? searchParams.event : undefined;
-  const selectedEvent = events.find((event) => event.slug === requestedSlug) ?? events[0];
-
-  let catalog: TicketCatalog | null = null;
-  if (selectedEvent?.pretixEventId) {
-    try {
-      const pretix = await getPretixCatalog(selectedEvent.pretixEventId);
-      const localize = (map?: Record<string, string>) => {
-        if (!map) return undefined;
-        const dict: Record<string, string> = map;
-        return dict[locale] ?? dict.en ?? Object.values(dict)[0];
-      };
-      catalog = {
-        eventSlug: selectedEvent.slug,
-        pretixEventSlug: selectedEvent.pretixEventId,
-        eventTitle: selectedEvent.title,
-        products: pretix.products.map(({ product, availability }) => ({
-          productId: product.id,
-          name: localize(product.name) ?? "Ticket",
-          description: localize(product.description) ?? "",
-          price: Number.parseFloat(product.default_price),
-          currency: "EUR",
-          available: availability?.available ?? null,
-        })),
-      };
-    } catch (error) {
-      console.error("Pretix catalog error", error);
-    }
-  }
-
-  const checkoutEnabled = Boolean(catalog);
+  const selectedEvent = events.find((event) => event.slug === requestedSlug) ?? null;
+  const hasEvents = events.length > 0;
+  const activeEvent = hasEvents ? selectedEvent ?? events[0] : null;
+  const primaryBlock =
+    activeEvent?.description?.find(
+      (block) => block?._type === "block" && Array.isArray(block.children),
+    ) ?? null;
+  const previewCopy = Array.isArray(primaryBlock?.children)
+    ? primaryBlock.children.find(isPortableTextSpan)?.text ?? null
+    : null;
 
   const navigation = siteConfig.navigation.map((item) => ({
     href: item.href,
@@ -66,7 +50,7 @@ export default async function TicketsPage({
       marqueeText="TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//"
       navigation={navigation}
       actions={
-        events.length ? (
+        hasEvents ? (
           <nav className="aer-chipset" aria-label="Ticketed events">
             {events.map((event) => (
               <Link
@@ -83,29 +67,58 @@ export default async function TicketsPage({
           </nav>
         ) : null
       }
-      footnote={
-        checkoutEnabled
-          ? undefined
-          : "Demo mode — add a Pretix event id in Sanity to activate checkout."
-      }
+      footnote={hasEvents ? "All ticket purchases are handled securely on Pretix." : undefined}
     >
-      {!events.length ? (
+      {!hasEvents ? (
         <div className="aer-panel text-[0.78rem] uppercase tracking-[0.2em] text-muted">
-          Pretix is not configured. Add a `pretixEventId` in Sanity to hydrate the live catalog.
+          Pretix links are not configured. Add a Pretix ticket shop URL in Sanity to enable sales.
         </div>
-      ) : (
-        <div className="space-y-6">
-          <TicketShop
-            catalog={catalog}
-            locale={locale}
-            checkoutLabel={general("checkout")}
-            emptyLabel=""
-            totalLabel={general("total")}
-            successRedirectLabel="Redirecting to secure checkout"
-            checkoutEnabled={checkoutEnabled}
-          />
-        </div>
-      )}
+      ) : activeEvent && activeEvent.pretixTicketShopUrl ? (
+        <section className="aer-panel space-y-4">
+          <header className="space-y-2">
+            <p className="text-[0.62rem] uppercase tracking-[0.24em] text-[rgba(255,255,255,0.55)]">
+              {formatDateTime(activeEvent.start, locale, {
+                weekday: "long",
+                day: "2-digit",
+                month: "long",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+              {activeEvent.venue ? ` · ${activeEvent.venue}` : ""}
+            </p>
+            <h2 className="font-display text-[2.2rem] tracking-[0.08em] text-foreground">
+              {activeEvent.title}
+            </h2>
+          </header>
+          {previewCopy ? (
+            <p className="text-sm uppercase tracking-[0.18em] text-[rgba(255,255,255,0.65)]">
+              {previewCopy}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href={activeEvent.pretixTicketShopUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="aer-nav-button aer-nav-button--compact event-action-link event-purchase-link"
+            >
+              {general("buyTickets")}
+            </a>
+            <span className="text-[0.62rem] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.45)]">
+              You will be redirected to Pretix to complete checkout.
+            </span>
+          </div>
+        </section>
+      ) : null}
     </SubpageFrame>
   );
+}
+
+interface PortableChild {
+  _type?: string;
+  text?: string;
+}
+
+function isPortableTextSpan(child: PortableChild | undefined): child is PortableChild & { text: string } {
+  return Boolean(child && child._type === "span" && typeof child.text === "string");
 }

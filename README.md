@@ -63,7 +63,7 @@ npm run sanity:dev
 
 ### Authentication
 
-Magic-link email sign-in is enabled via next-auth Email provider. Configure SMTP credentials in `.env.local`. Protected routes such as `/checkin` or `/admin` require role `STAFF` or `ADMIN` on the Prisma `User` model.
+Magic-link email sign-in is enabled via next-auth Email provider. Configure SMTP credentials in `.env.local`. Protected routes such as `/checkin` require role `STAFF` or `ADMIN` on the Prisma `User` model.
 
 ### Testing
 
@@ -99,7 +99,6 @@ Deploy to Vercel:
 
 ### Operations
 
-- `/admin` shows upcoming events and release counts (requires ADMIN/EDITOR role).
 - `/checkin` provides camera-based Pretix QR validation (requires STAFF/ADMIN).
 - `/tickets` pulls Pretix catalog data and launches Stripe Checkout.
 
@@ -109,6 +108,10 @@ Deploy to Vercel:
 - `npm run prisma:migrate` – Create a new migration
 - `npm run prisma:deploy` – Apply migrations in production
 - `npm run seed` – Push starter content into Sanity
+
+## Automation & AI Agents
+
+An AI helper can follow the step-by-step playbook in [`docs/automation.md`](docs/automation.md) to install dependencies, manage environment variables, run checks, and deploy safely. Keep that document updated whenever the workflow changes so automated contributors stay in sync with human operators.
 
 ## License
 
