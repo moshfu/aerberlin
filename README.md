@@ -113,6 +113,10 @@ Deploy to Vercel:
 
 An AI helper can follow the step-by-step playbook in [`docs/automation.md`](docs/automation.md) to install dependencies, manage environment variables, run checks, and deploy safely. Keep that document updated whenever the workflow changes so automated contributors stay in sync with human operators.
 
+## Repository
+
+Primary remote: [`moshfu/aerberlin`](https://github.com/moshfu/aerberlin). Pushes to `main` follow the deployment workflow described in the automation playbook.
+
 ## License
 
 MIT
