@@ -11,8 +11,9 @@ import type { SanityArtist } from "@/lib/sanity.types";
 export default async function ArtistsPage({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = await searchParams;
   const [t, general, navT] = await Promise.all([
     getTranslations("artists"),
     getTranslations("general"),
@@ -20,7 +21,7 @@ export default async function ArtistsPage({
   ]);
   const artists = await getArtists();
 
-  const filter = typeof searchParams.filter === "string" ? searchParams.filter : "all";
+  const filter = typeof params.filter === "string" ? params.filter : "all";
   const filtered = artists.filter((artist) => {
     const role = artist.role?.toLowerCase();
     if (filter === "residents") {

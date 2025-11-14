@@ -9,6 +9,14 @@ import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 
 const useMockAuth = env.USE_MOCK_AUTH === "true";
+const MOCK_ADMIN_HASH = "$2b$10$E6gTn6zkRgZNpmjDoE7Yd.8iTIQ6kGsE2wVqbodIZ6hO6PvxI6Bjq"; // "admin"
+
+const adminEmail = env.ADMIN_EMAIL ?? (useMockAuth ? "admin@mock.local" : undefined);
+const adminPasswordHash = env.ADMIN_PASSWORD_HASH ?? (useMockAuth ? MOCK_ADMIN_HASH : undefined);
+
+if (!useMockAuth && (!adminEmail || !adminPasswordHash)) {
+  throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD_HASH must be configured when USE_MOCK_AUTH=false");
+}
 
 const transporter = createTransport({
   host: env.EMAIL_SERVER_HOST,
@@ -40,21 +48,20 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
-        if (credentials.email !== env.ADMIN_EMAIL) {
+        if (!adminEmail || credentials.email !== adminEmail) {
           return null;
         }
-        const hash = env.ADMIN_PASSWORD_HASH;
-        if (!hash) {
+        if (!adminPasswordHash) {
           return null;
         }
-        const valid = await bcrypt.compare(credentials.password, hash);
+        const valid = await bcrypt.compare(credentials.password, adminPasswordHash);
         if (!valid) {
           return null;
         }
         if (useMockAuth) {
           return {
             id: "mock-admin",
-            email: credentials.email,
+            email: adminEmail,
             role: Role.ADMIN,
             name: "Admin",
           };

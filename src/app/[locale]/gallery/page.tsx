@@ -9,8 +9,9 @@ import { siteConfig } from "@/config/site";
 export default async function GalleryPage({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = await searchParams;
   const [t, navT] = await Promise.all([
     getTranslations("gallery"),
     getTranslations("navigation"),
@@ -22,7 +23,7 @@ export default async function GalleryPage({
   }));
 
   const tags = Array.from(new Set(items.flatMap((item) => item.tags ?? [])));
-  const selectedTag = typeof searchParams.tag === "string" ? searchParams.tag : "all";
+  const selectedTag = typeof params.tag === "string" ? params.tag : "all";
   const filtered = selectedTag === "all"
     ? items
     : items.filter((item) => item.tags?.includes(selectedTag));

@@ -10,9 +10,9 @@ export default async function TicketsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { locale } = await params;
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
   const [t, general, navT] = await Promise.all([
     getTranslations("tickets"),
     getTranslations("general"),
@@ -27,7 +27,7 @@ export default async function TicketsPage({
     const cutoff = new Date(event.end ?? event.start);
     return cutoff >= now;
   });
-  const requestedSlug = typeof searchParams.event === "string" ? searchParams.event : undefined;
+  const requestedSlug = typeof query.event === "string" ? query.event : undefined;
   const selectedEvent = events.find((event) => event.slug === requestedSlug) ?? null;
   const hasEvents = events.length > 0;
   const activeEvent = hasEvents ? selectedEvent ?? events[0] : null;
