@@ -23,7 +23,6 @@ export default async function TicketsPage({
   const events = (await getEvents()).filter((event) => {
     if (event.ticketingSource !== "pretix") return false;
     if (!event.pretixTicketShopUrl) return false;
-    if (event.ticketSalesOpen === false) return false;
     const cutoff = new Date(event.end ?? event.start);
     return cutoff >= now;
   });
@@ -96,17 +95,25 @@ export default async function TicketsPage({
             </p>
           ) : null}
           <div className="flex flex-wrap items-center gap-3">
-            <a
-              href={activeEvent.pretixTicketShopUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="aer-nav-button aer-nav-button--compact event-action-link event-purchase-link"
-            >
-              {general("buyTickets")}
-            </a>
-            <span className="text-[0.62rem] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.45)]">
-              You will be redirected to Pretix to complete checkout.
-            </span>
+            {activeEvent.ticketSalesOpen === false ? (
+              <span className="text-[0.68rem] uppercase tracking-[0.24em] text-[rgba(255,255,255,0.62)]">
+                {general("salesNotStarted")}
+              </span>
+            ) : (
+              <>
+                <a
+                  href={activeEvent.pretixTicketShopUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="aer-nav-button aer-nav-button--compact event-action-link event-purchase-link"
+                >
+                  {general("buyTickets")}
+                </a>
+                <span className="text-[0.62rem] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.45)]">
+                  You will be redirected to Pretix to complete checkout.
+                </span>
+              </>
+            )}
           </div>
         </section>
       ) : null}

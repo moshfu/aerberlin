@@ -81,7 +81,8 @@ export default async function EventPage({ params }: EventPageProps) {
   const soldOut = event.tags?.some((tag) => tag.toLowerCase().includes("sold"));
   const now = new Date();
   const cutoffDate = new Date(event.end ?? event.start);
-  const ticketSalesActive = event.ticketSalesOpen !== false && cutoffDate >= now;
+  const ticketSalesEnabled = event.ticketSalesOpen !== false;
+  const ticketSalesActive = ticketSalesEnabled && cutoffDate >= now;
   const startStamp = formatDateTime(event.start, locale, {
     weekday: "long",
     day: "2-digit",
@@ -192,7 +193,12 @@ export default async function EventPage({ params }: EventPageProps) {
 
   const accessLinks: ActionLink[] = buyTicketsLink
     ? [{ ...buyTicketsLink }]
-    : [{ label: general("soldOut"), disabled: true }];
+    : [
+        {
+          label: ticketSalesEnabled ? general("soldOut") : general("salesNotStarted"),
+          disabled: true,
+        },
+      ];
 
   return (
     <>

@@ -2,31 +2,23 @@ import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
 import { SpinningMark } from "@/components/motion/spinning-mark";
-import { MobileNav } from "@/components/navigation/mobile-nav";
-
-const desktopNavItems = siteConfig.navigation.map((item) => ({
+const navItems = siteConfig.navigation.map((item) => ({
   key: item.key,
   href: item.href,
   label: item.key.toUpperCase(),
-}));
-
-const mobileNavItems = siteConfig.navigation.map((item) => ({
-  key: item.key,
-  href: item.href,
-  label: item.key,
 }));
 
 export async function Header({ className }: { className?: string }) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 border-b border-white/5 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
+        "sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
         className,
       )}
     >
       <div className="h-1.5 w-full bg-accent" />
       <div className="bg-transparent px-4 py-4">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
           {siteConfig.brand.logo ? (
             <Link
               href="/"
@@ -34,7 +26,7 @@ export async function Header({ className }: { className?: string }) {
               aria-label={`${siteConfig.name} home`}
             >
               <SpinningMark
-                size={420}
+                size={360}
                 orbitScale={0.72}
                 className="aer-logo"
                 imageSrc={siteConfig.brand.logo}
@@ -43,17 +35,13 @@ export async function Header({ className }: { className?: string }) {
             </Link>
           ) : null}
 
-          <nav className="hidden flex-1 items-center justify-center gap-2 lg:flex">
-            {desktopNavItems.map((item) => (
+          <nav className="aer-header-nav" aria-label="Primary">
+            {navItems.map((item) => (
               <Link key={item.key} href={item.href} className="aer-nav-button aer-nav-button--compact">
                 {item.label}
               </Link>
             ))}
           </nav>
-
-          <div className="flex items-center lg:hidden">
-            <MobileNav items={mobileNavItems} />
-          </div>
         </div>
       </div>
     </header>

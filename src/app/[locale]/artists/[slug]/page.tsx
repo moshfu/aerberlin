@@ -289,10 +289,12 @@ async function FeaturedReleaseCard({ release }: { release: FeaturedReleaseLink }
           <Image
             src={cover.url}
             alt={resolvedTitle ?? "Featured release artwork"}
-            fill
-            sizes="240px"
+            width={640}
+            height={640}
+            sizes="(max-width: 640px) 70vw, 240px"
             className="aer-featured-release__image"
             unoptimized={cover.unoptimized}
+            priority={false}
           />
         ) : (
           <span className="aer-featured-release__fallback" aria-hidden="true" />
