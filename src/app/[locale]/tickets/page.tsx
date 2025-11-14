@@ -3,7 +3,6 @@ import { Link } from "@/i18n/routing";
 import { getEvents } from "@/server/sanity";
 import { cn, formatDateTime } from "@/lib/utils";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
-import { siteConfig } from "@/config/site";
 
 export default async function TicketsPage({
   params,
@@ -13,10 +12,9 @@ export default async function TicketsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
-  const [t, general, navT] = await Promise.all([
+  const [t, general] = await Promise.all([
     getTranslations("tickets"),
     getTranslations("general"),
-    getTranslations("navigation"),
   ]);
 
   const now = new Date();
@@ -38,16 +36,10 @@ export default async function TicketsPage({
     ? primaryBlock.children.find(isPortableTextSpan)?.text ?? null
     : null;
 
-  const navigation = siteConfig.navigation.map((item) => ({
-    href: item.href,
-    label: navT(item.key),
-  }));
-
   return (
     <SubpageFrame
       title={t("title")}
       marqueeText="TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//"
-      navigation={navigation}
       actions={
         hasEvents ? (
           <nav className="aer-chipset" aria-label="Ticketed events">

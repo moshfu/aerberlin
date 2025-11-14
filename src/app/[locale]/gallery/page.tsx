@@ -4,7 +4,6 @@ import { getGalleryItems } from "@/server/sanity";
 import { LightboxGallery } from "@/components/gallery/lightbox";
 import { cn } from "@/lib/utils";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
-import { siteConfig } from "@/config/site";
 
 export default async function GalleryPage({
   searchParams,
@@ -12,15 +11,8 @@ export default async function GalleryPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const [t, navT] = await Promise.all([
-    getTranslations("gallery"),
-    getTranslations("navigation"),
-  ]);
+  const [t] = await Promise.all([getTranslations("gallery")]);
   const items = await getGalleryItems();
-  const navigation = siteConfig.navigation.map((item) => ({
-    href: item.href,
-    label: navT(item.key),
-  }));
 
   const tags = Array.from(new Set(items.flatMap((item) => item.tags ?? [])));
   const selectedTag = typeof params.tag === "string" ? params.tag : "all";
@@ -33,7 +25,6 @@ export default async function GalleryPage({
       title={t("title")}
       description={<p>Nightscapes, strobes and analog film from the aer berlin orbit.</p>}
       marqueeText="GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//GALLERY//"
-      navigation={navigation}
       actions={
         <nav className="aer-chipset" aria-label="Gallery filters">
           <FilterLink label={t("filter")} value="all" active={selectedTag === "all"} />

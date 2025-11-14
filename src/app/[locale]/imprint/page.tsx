@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server";
 import type { PortableTextBlock } from "sanity";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
 import { PortableTextContent } from "@/components/portable-text/portable-text";
@@ -272,18 +271,12 @@ const fallbackImprintContent = (contactEmail: string): PortableTextBlock[] => [
 ];
 
 export default async function ImprintPage() {
-  const navT = await getTranslations("navigation");
   const page = await getPageBySlug("impressum");
-  const navigation = siteConfig.navigation.map((item) => ({
-    href: item.href,
-    label: navT(item.key),
-  }));
   const content = page?.body && page.body.length > 0 ? page.body : fallbackImprintContent(siteConfig.contactEmail);
   return (
     <SubpageFrame
       title="Imprint"
       marqueeText="IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//IMPRINT//"
-      navigation={navigation}
     >
       <div className="aer-panel">
         <PortableTextContent value={content} className="aer-panel__content space-y-4 text-sm" />

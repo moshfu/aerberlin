@@ -63,18 +63,13 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
     notFound();
   }
 
-  const [t, navT] = await Promise.all([getTranslations("artists"), getTranslations("navigation")]);
+  const [t] = await Promise.all([getTranslations("artists")]);
   const marquee = artist.marqueeText ?? `${artist.name.toUpperCase()} // LIVE TRANSMISSIONS`;
   const role = artist.role ?? t("title");
   const portrait = artist.portrait?.asset
     ? urlFor(artist.portrait).width(960).height(1200).quality(85).url()
     : null;
   const tags = artist.tags ?? [];
-
-  const navigation = siteConfig.navigation.map((item) => ({
-    href: item.href,
-    label: navT(item.key),
-  }));
 
   const ordered = [...allArtists].sort((a, b) => a.name.localeCompare(b.name));
   const idx = ordered.findIndex((entry) => entry.slug === artist.slug);
@@ -106,7 +101,6 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
         title={artist.name}
         description={<p>{role}</p>}
         marqueeText={marquee}
-        navigation={navigation}
         meta={
           tags.length ? (
             <div className="aer-tag-strip">

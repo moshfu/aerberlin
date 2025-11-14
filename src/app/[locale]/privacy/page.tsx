@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server";
 import type { PortableTextBlock } from "sanity";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
 import { PortableTextContent } from "@/components/portable-text/portable-text";
@@ -230,18 +229,12 @@ const fallbackPrivacyContent = (contactEmail: string): PortableTextBlock[] => [
 ];
 
 export default async function PrivacyPage() {
-  const navT = await getTranslations("navigation");
   const page = await getPageBySlug("datenschutz");
-  const navigation = siteConfig.navigation.map((item) => ({
-    href: item.href,
-    label: navT(item.key),
-  }));
   const content = page?.body && page.body.length > 0 ? page.body : fallbackPrivacyContent(siteConfig.contactEmail);
   return (
     <SubpageFrame
       title="Privacy Policy"
       marqueeText="PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//PRIVACY//"
-      navigation={navigation}
     >
       <div className="aer-panel">
         <PortableTextContent value={content} className="aer-panel__content space-y-4 text-sm" />

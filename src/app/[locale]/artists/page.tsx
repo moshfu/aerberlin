@@ -5,7 +5,6 @@ import { getArtists } from "@/server/sanity";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
 import { urlFor } from "@/lib/sanity.server";
 import { cn } from "@/lib/utils";
-import { siteConfig } from "@/config/site";
 import type { SanityArtist } from "@/lib/sanity.types";
 
 export default async function ArtistsPage({
@@ -14,10 +13,9 @@ export default async function ArtistsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const [t, general, navT] = await Promise.all([
+  const [t, general] = await Promise.all([
     getTranslations("artists"),
     getTranslations("general"),
-    getTranslations("navigation"),
   ]);
   const artists = await getArtists();
 
@@ -37,17 +35,11 @@ export default async function ArtistsPage({
     ? [...filtered].sort((a, b) => a.name.localeCompare(b.name))
     : filtered;
 
-  const navigation = siteConfig.navigation.map((item) => ({
-    href: item.href,
-    label: navT(item.key),
-  }));
-
   return (
     <SubpageFrame
       title={t("title")}
       marqueeText="// ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS // ARTISTS //"
       description={<p>Residents. Guest. Sonic conspirators.</p>}
-      navigation={navigation}
       actions={
         <nav className="aer-chipset flex flex-wrap gap-3" aria-label="Artist filters">
           <FilterLink label={t("filters.all")} value="all" active={filter === "all"} />

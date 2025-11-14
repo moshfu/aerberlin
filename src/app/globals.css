@@ -273,9 +273,9 @@
   }
 
   .aer-header-nav .aer-nav-button {
-    font-size: clamp(1.05rem, 2vw, 1.35rem);
-    letter-spacing: 0.32em;
-    padding: 0.75rem 2rem;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    letter-spacing: 0.26em;
+    padding: 0.65rem 1.8rem;
   }
 
   @media (max-width: 768px) {
@@ -283,23 +283,16 @@
       justify-content: center;
     }
     .aer-header-nav {
-      flex-wrap: nowrap;
-      overflow-x: auto;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.45rem;
       padding-bottom: 0.35rem;
-      justify-content: flex-start;
-      gap: 0.6rem;
-      width: 100%;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .aer-header-nav::-webkit-scrollbar {
-      display: none;
     }
     .aer-header-nav .aer-nav-button {
-      min-width: 7.5rem;
-      text-align: center;
-      font-size: clamp(0.95rem, 5vw, 1.2rem);
-      padding: 0.65rem 1.4rem;
+      flex: 1 1 calc(50% - 0.45rem);
+      min-width: auto;
+      font-size: clamp(0.85rem, 4vw, 1.05rem);
+      padding: 0.6rem 0.9rem;
     }
   }
 
@@ -1437,3 +1430,29 @@
     transform: translateX(-50%);
   }
 }
+  @media (max-width: 640px) {
+    .aer-content {
+      padding-top: 1.5rem;
+      gap: 0.4rem;
+    }
+    .aer-header-logo {
+      transform: translateY(-0.5rem);
+    }
+    .aer-logo {
+      width: clamp(180px, 70vw, 260px);
+    }
+    .aer-header-nav {
+      gap: 0.35rem;
+    }
+    .aer-header-nav .aer-nav-button {
+      flex-basis: calc(50% - 0.35rem);
+    }
+    .aer-marquee-shell {
+      gap: 0.9rem;
+      margin-top: -0.5rem;
+    }
+    .aer-marquee-row {
+      width: 120vw;
+      margin-inline: calc(50% - 60vw);
+    }
+  }

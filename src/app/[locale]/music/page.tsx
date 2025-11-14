@@ -4,25 +4,18 @@ import { getReleases } from "@/server/sanity";
 import { urlFor } from "@/lib/sanity.server";
 import { MediaEmbed } from "@/components/media/media-embed";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
-import { siteConfig } from "@/config/site";
 
 export default async function MusicPage() {
-  const [t, navT] = await Promise.all([
+  const [t] = await Promise.all([
     getTranslations("music"),
-    getTranslations("navigation"),
   ]);
   const releases = await getReleases();
-  const navigation = siteConfig.navigation.map((item) => ({
-    href: item.href,
-    label: navT(item.key),
-  }));
 
   return (
     <SubpageFrame
       title={t("title")}
       description={<p>LIVE. CAPTURED. ARCHIVED.</p>}
       marqueeText="// MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC // MUSIC //"
-      navigation={navigation}
     >
       <div className="aer-grid aer-grid--two">
         {releases.map((release) => (

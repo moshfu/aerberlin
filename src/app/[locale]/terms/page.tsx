@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server";
 import type { PortableTextBlock } from "sanity";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
 import { PortableTextContent } from "@/components/portable-text/portable-text";
@@ -397,18 +396,12 @@ const fallbackTermsContent = (contactEmail: string): PortableTextBlock[] => [
 ];
 
 export default async function TermsPage() {
-  const navT = await getTranslations("navigation");
   const page = await getPageBySlug("agb");
-  const navigation = siteConfig.navigation.map((item) => ({
-    href: item.href,
-    label: navT(item.key),
-  }));
   const content = page?.body && page.body.length > 0 ? page.body : fallbackTermsContent(siteConfig.contactEmail);
   return (
     <SubpageFrame
       title="Terms & Conditions"
       marqueeText="TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//TERMS//"
-      navigation={navigation}
     >
       <div className="aer-panel">
         <PortableTextContent value={content} className="aer-panel__content space-y-4 text-sm" />

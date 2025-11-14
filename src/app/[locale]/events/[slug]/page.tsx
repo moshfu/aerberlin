@@ -73,9 +73,8 @@ export default async function EventPage({ params }: EventPageProps) {
   if (!event) {
     notFound();
   }
-  const [general, navT] = await Promise.all([
+  const [general] = await Promise.all([
     getTranslations("general"),
-    getTranslations("navigation"),
   ]);
 
   const soldOut = event.tags?.some((tag) => tag.toLowerCase().includes("sold"));
@@ -133,11 +132,6 @@ export default async function EventPage({ params }: EventPageProps) {
       };
     }
   }
-
-  const navigation = siteConfig.navigation.map((item) => ({
-    href: item.href,
-    label: navT(item.key),
-  }));
 
   const renderActionLink = (link: ActionLink) => {
     const key = `${link.label}-${link.href ?? "noop"}`;
@@ -211,7 +205,6 @@ export default async function EventPage({ params }: EventPageProps) {
           </p>
         }
         marqueeText={marquee}
-        navigation={navigation}
         actions={
           heroLinks.length ? (
             <div className="event-head-actions flex flex-wrap gap-3">{heroLinks.map(renderActionLink)}</div>
