@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   }
   const title = `${artist.name} · ${siteConfig.name}`;
   const imageUrl = artist.portrait?.asset
-    ? urlFor(artist.portrait).width(1200).height(1500).quality(85).url()
+    ? urlFor(artist.portrait).width(1200).height(1200).quality(85).url()
     : "/og.jpg";
   const description = artist.tags?.join(", ") ?? artist.role ?? undefined;
   return {
@@ -67,7 +67,7 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
   const marquee = artist.marqueeText ?? `${artist.name.toUpperCase()} // LIVE TRANSMISSIONS`;
   const role = artist.role ?? t("title");
   const portrait = artist.portrait?.asset
-    ? urlFor(artist.portrait).width(960).height(1200).quality(85).url()
+    ? urlFor(artist.portrait).width(1000).height(1000).quality(85).url()
     : null;
   const tags = artist.tags ?? [];
 

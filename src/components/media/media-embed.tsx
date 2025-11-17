@@ -8,16 +8,18 @@ export function MediaEmbed({ url, title }: MediaEmbedProps) {
   const lower = url.toLowerCase();
   if (lower.includes("soundcloud")) {
     return (
-      <div className="overflow-hidden rounded-[var(--radius-md)] border border-[rgba(255,255,255,0.12)] bg-[rgba(12,12,12,0.9)]">
+      <div className="min-w-0 overflow-hidden rounded-[var(--radius-md)] border border-[rgba(255,255,255,0.12)] bg-[rgba(12,12,12,0.9)] shadow-[0_24px_48px_rgba(0,0,0,0.35)] min-h-[11.5rem] w-full">
         <iframe
           title={`${title} – SoundCloud`}
           width="100%"
-          height="166"
+          height="184"
           scrolling="no"
           frameBorder="no"
           allow="autoplay"
-          src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff3ea5&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false`}
-          className="w-full"
+          src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(
+            url,
+          )}&color=%23ff102a&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true&show_artwork=true`}
+          className="block h-[11.5rem] w-full"
           loading="lazy"
         />
       </div>
@@ -25,7 +27,7 @@ export function MediaEmbed({ url, title }: MediaEmbedProps) {
   }
   if (lower.includes("bandcamp")) {
     return (
-      <div className="overflow-hidden rounded-[var(--radius-md)] border border-[rgba(255,255,255,0.12)] bg-[rgba(12,12,12,0.9)]">
+      <div className="min-w-0 overflow-hidden rounded-[var(--radius-md)] border border-[rgba(255,255,255,0.12)] bg-[rgba(12,12,12,0.9)] w-full">
         <iframe
           title={`${title} – Bandcamp`}
           style={{ border: 0 }}
@@ -39,7 +41,7 @@ export function MediaEmbed({ url, title }: MediaEmbedProps) {
   }
   if (lower.includes("spotify")) {
     return (
-      <div className="overflow-hidden rounded-[var(--radius-md)] border border-[rgba(255,255,255,0.12)] bg-[rgba(12,12,12,0.9)]">
+      <div className="min-w-0 overflow-hidden rounded-[var(--radius-md)] border border-[rgba(255,255,255,0.12)] bg-[rgba(12,12,12,0.9)] w-full">
         <iframe
           title={`${title} – Spotify`}
           src={`https://open.spotify.com/embed/${url.split("spotify.com/")[1] ?? ""}`}
@@ -58,7 +60,7 @@ export function MediaEmbed({ url, title }: MediaEmbedProps) {
     const videoId = videoIdMatch?.[1];
     if (!videoId) return null;
     return (
-      <div className="overflow-hidden rounded-[var(--radius-md)] border border-[rgba(255,255,255,0.12)] bg-[rgba(12,12,12,0.9)]">
+      <div className="min-w-0 overflow-hidden rounded-[var(--radius-md)] border border-[rgba(255,255,255,0.12)] bg-[rgba(12,12,12,0.9)] w-full">
         <iframe
           title={`${title} – YouTube`}
           width="100%"

@@ -7,6 +7,8 @@ import { urlFor } from "@/lib/sanity.server";
 import { cn } from "@/lib/utils";
 import type { SanityArtist } from "@/lib/sanity.types";
 
+export const dynamic = "force-dynamic";
+
 export default async function ArtistsPage({
   searchParams,
 }: {
@@ -81,7 +83,7 @@ function ArtistTile({
   readMoreLabel: string;
 }) {
   const portrait = artist.portrait?.asset
-    ? urlFor(artist.portrait).width(560).height(700).quality(80).url()
+    ? urlFor(artist.portrait).width(640).height(640).quality(80).url()
     : null;
 
   // Heuristic: auto scale X based on name length if no manual size provided

@@ -59,6 +59,7 @@ export default async function EventsPage({
         readMoreLabel={general("readMore")}
         emptyLabel={t("noEvents")}
         soldOutLabel={general("soldOut")}
+        salesNotStartedLabel={general("salesNotStarted")}
       />
     </SubpageFrame>
   );
@@ -71,6 +72,7 @@ function EventsList({
   readMoreLabel,
   emptyLabel,
   soldOutLabel,
+  salesNotStartedLabel,
 }: {
   events: SanityEvent[];
   locale: string;
@@ -78,6 +80,7 @@ function EventsList({
   readMoreLabel: string;
   emptyLabel: string;
   soldOutLabel: string;
+  salesNotStartedLabel: string;
 }) {
   if (!events.length) {
     return (
@@ -97,6 +100,7 @@ function EventsList({
           ctaLabel={ctaLabel}
           readMoreLabel={readMoreLabel}
           soldOutLabel={soldOutLabel}
+          salesNotStartedLabel={salesNotStartedLabel}
         />
       ))}
     </div>
@@ -111,12 +115,14 @@ function EventRailItem({
   ctaLabel,
   readMoreLabel,
   soldOutLabel,
+  salesNotStartedLabel,
 }: {
   event: SanityEvent;
   locale: string;
   ctaLabel: string;
   readMoreLabel: string;
   soldOutLabel: string;
+  salesNotStartedLabel: string;
 }) {
   const startDate = formatDateTime(event.start, locale, {
     day: "2-digit",
@@ -128,6 +134,7 @@ function EventRailItem({
     minute: "2-digit",
   });
   const soldOut = event.tags?.some((tag) => tag.toLowerCase().includes("sold"));
+  const ticketSalesEnabled = event.ticketSalesOpen !== false;
   const meta = `${startDate} · ${startTime} CET${event.venue ? ` · ${event.venue.toUpperCase()}` : ""}`;
   const lineupSummary = event.lineup?.length
     ? event.lineup.map((artist) => artist.name).join(" · ")
@@ -152,23 +159,30 @@ function EventRailItem({
         ) : null}
       </header>
 
-      <div className="flex flex-wrap gap-3 text-[0.78rem] uppercase tracking-[0.22em]">
+      <div className="flex flex-wrap items-center gap-3 text-[0.78rem] uppercase tracking-[0.22em] lg:flex-nowrap">
         <Link
           href={`/events/${event.slug}`}
           className="aer-nav-button aer-rail__cta"
         >
           {readMoreLabel}
         </Link>
-        <Link
-          href={`/tickets?event=${event.slug}`}
-          className={cn(
-            "aer-nav-button aer-rail__cta",
-            soldOut && "is-disabled",
-          )}
-          aria-disabled={soldOut}
-        >
-          {soldOut ? soldOutLabel : ctaLabel}
-        </Link>
+        {ticketSalesEnabled ? (
+          <Link
+            href={`/tickets?event=${event.slug}`}
+            className={cn(
+              "aer-nav-button aer-rail__cta",
+              soldOut && "is-disabled",
+            )}
+            aria-disabled={soldOut}
+          >
+            {soldOut ? soldOutLabel : ctaLabel}
+          </Link>
+        ) : null}
+        {!ticketSalesEnabled ? (
+          <span className="text-[0.72rem] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.65)]">
+            {salesNotStartedLabel}
+          </span>
+        ) : null}
       </div>
     </article>
   );

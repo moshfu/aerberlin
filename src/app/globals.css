@@ -34,12 +34,27 @@
     box-sizing: border-box;
   }
 
+  html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     @apply antialiased bg-background text-foreground;
     background: var(--color-background);
     font-family: var(--font-body, Inter), system-ui, -apple-system, "Segoe UI", sans-serif;
     min-height: 100vh;
+    margin: 0;
     cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath fill='%23ff102a' d='M20 2l6 6 9 1-6.5 6.5L31 29l-11-6-11 6 2.5-13.5L5 9l9-1z'/%3E%3Cpath fill='%23ff7a8d' d='M20 8l4 4 5 .6-3.8 3.8L27 25l-7-3.8L13 25l1.8-8.6L11 12.6l5-.6z'/%3E%3C/svg%3E") 3 3, auto;
+    overflow-x: hidden;
+  }
+
+  img,
+  picture,
+  video {
+    max-width: 100%;
+    height: auto;
   }
 
   body[data-aer-home="true"] .aer-header-logo {
@@ -190,6 +205,7 @@
     min-height: 100vh;
     background: var(--color-background);
     color: var(--color-foreground);
+    overflow-x: hidden;
   }
 
   .aer-noise-defs {
@@ -229,15 +245,18 @@
     padding: clamp(0.2rem, 1vh, 0.6rem) 0.5rem clamp(0.2rem, 1vh, 0.6rem);
     gap: clamp(0.3rem, 1vw, 0.8rem);
     text-align: center;
-    margin-top: clamp(-0.5rem, -2vh, -0.2rem);
+    margin-top: clamp(0.5rem, 2vh, 1.2rem);
   }
 
   .aer-content--subpage {
+    width: min(1040px, 100%);
+    margin: 0 auto;
     align-items: stretch;
     justify-content: flex-start;
     text-align: left;
-    padding-top: clamp(2.4rem, 6vh, 4.5rem);
-    gap: clamp(1.6rem, 4vw, 2.8rem);
+    padding-top: clamp(2rem, 5vh, 3rem);
+    padding-inline: clamp(1rem, 5vw, 1.5rem);
+    gap: clamp(1.4rem, 3vw, 2.2rem);
   }
 
   .aer-brand {
@@ -253,13 +272,13 @@
   }
 
   .aer-logo {
-    width: clamp(200px, 28vw, 360px);
+    width: clamp(160px, 22vw, 300px);
     height: auto;
     border-radius: 12px;
   }
 
   .aer-logo--home {
-    width: clamp(280px, 42vw, 520px);
+    width: clamp(220px, 32vw, 420px);
   }
 
   .aer-header-nav {
@@ -300,12 +319,13 @@
     position: relative;
     width: 100vw;
     margin-inline: calc(50% - 50vw);
-    margin-top: clamp(-2rem, -5vh, -1rem);
+    margin-top: clamp(0rem, 2vh, 1rem);
     display: flex;
     flex-direction: column;
-    gap: clamp(1rem, 3vw, 2rem);
+    gap: clamp(0.25rem, 0.8vw, 0.6rem);
     perspective: 1800px;
     pointer-events: none;
+    overflow: hidden;
   }
 
   .aer-marquee-row {
@@ -319,23 +339,23 @@
   }
 
   .aer-marquee-row--top {
-    opacity: 0.6;
-    transform: rotateX(36deg) translateY(-4vh) translateZ(-220px);
+    opacity: 0.65;
+    transform: rotateX(28deg) translateY(-1.8vh) translateZ(-140px);
   }
 
   .aer-marquee-row--bottom {
-    opacity: 0.6;
-    transform: rotateX(-36deg) translateY(4vh) translateZ(-220px);
+    opacity: 0.65;
+    transform: rotateX(-28deg) translateY(1.8vh) translateZ(-140px);
   }
 
   .aer-marquee-row--main {
-    transform: translateZ(-60px);
+    transform: translateZ(-80px);
   }
 
   .aer-marquee {
     display: flex;
     align-items: center;
-    gap: clamp(1.4rem, 3vw, 2.4rem);
+    gap: clamp(0.85rem, 2vw, 1.6rem);
     min-width: 100%;
     white-space: nowrap;
     animation: aer-marquee-scroll 12s linear infinite;
@@ -365,11 +385,13 @@
   .aer-subpage {
     position: relative;
     width: 100%;
-    max-width: none;
-    margin: 0;
-    padding: clamp(2rem, 5vh, 3.4rem) clamp(1.2rem, 4vw, 3.6rem);
-    background: rgba(6, 6, 6, 0.82);
-    backdrop-filter: blur(20px) saturate(140%);
+    max-width: min(1040px, calc(100vw - 1.5rem));
+    margin-inline: auto;
+    padding: clamp(1.5rem, 4vh, 2.4rem) clamp(1rem, 4vw, 1.75rem);
+    background: rgba(6, 6, 6, 0.88);
+    backdrop-filter: blur(22px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: var(--shadow-subtle);
   }
 
   .aer-subpage__inner {
@@ -396,18 +418,26 @@
 
   .aer-subpage__title {
     font-family: var(--font-display, "Bebas Neue"), sans-serif;
-    font-size: clamp(2.8rem, 6vw, 4.4rem);
-    letter-spacing: 0.08em;
+    font-size: clamp(2.6rem, 5vw, 4rem);
+    letter-spacing: 0.06em;
     line-height: 0.9;
     color: rgba(255, 251, 248, 0.96);
     text-transform: lowercase;
   }
 
   .aer-subpage__lede {
-    font-size: clamp(0.85rem, 1.2vw, 1rem);
-    letter-spacing: 0.18em;
+    font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.62);
+    line-height: 1.45;
+  }
+
+  .aer-subpage__title,
+  .aer-subpage__lede,
+  .aer-panel__heading,
+  .aer-panel__content {
+    overflow-wrap: anywhere;
   }
 
   .aer-subpage__meta {
@@ -429,7 +459,12 @@
 
   .aer-subpage__body {
     display: grid;
-    gap: clamp(1.8rem, 4vw, 2.6rem);
+    gap: clamp(1.2rem, 3vw, 2rem);
+    word-break: break-word;
+  }
+
+  .aer-subpage__body > * + * {
+    margin-top: clamp(0.8rem, 2vw, 1.2rem);
   }
 
   .aer-subpage__footer {
@@ -448,7 +483,7 @@
   }
 
   .aer-grid--two {
-    grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
   }
 
   .aer-grid--three {
@@ -458,7 +493,39 @@
   .aer-rail {
     display: grid;
     gap: clamp(1.5rem, 3vw, 2.6rem);
-    grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+  }
+
+  @media (max-width: 1024px) {
+    .aer-grid--two,
+    .aer-rail {
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .aer-grid {
+      gap: clamp(1.4rem, 3vw, 1.8rem);
+    }
+
+    .aer-grid--two,
+    .aer-rail {
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .aer-grid--two,
+    .aer-rail {
+      grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .aer-grid--two,
+    .aer-rail {
+      grid-template-columns: 1fr;
+    }
   }
 
   .aer-event {
@@ -495,8 +562,10 @@
     position: relative;
     z-index: 5;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     margin-top: clamp(0.25rem, 0.8vh, 0.75rem);
+    width: 100%;
+    text-align: center;
   }
 
   .event-action-link {
@@ -572,34 +641,42 @@
   }
 
   .aer-panel {
-    background: var(--color-surface);
+    background: rgba(8, 8, 8, 0.92);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: var(--shadow-subtle);
-    padding: clamp(1.75rem, 4vw, 2.4rem);
+    box-shadow: none;
+    padding: clamp(1.5rem, 3vw, 2rem);
     display: grid;
-    gap: 1.1rem;
+    gap: 0.9rem;
+    overflow-wrap: anywhere;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 18px;
+    margin: 0 auto;
   }
 
   .aer-panel__meta {
-    font-size: 0.68rem;
-    letter-spacing: 0.28em;
+    font-size: 0.6rem;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.48);
   }
 
   .aer-panel__heading {
     font-family: var(--font-display, "Bebas Neue"), sans-serif;
-    font-size: clamp(1.9rem, 4vw, 2.6rem);
-    letter-spacing: 0.06em;
+    font-size: clamp(1.6rem, 3.6vw, 2.3rem);
+    letter-spacing: 0.05em;
     text-transform: lowercase;
+    margin-bottom: 0.2rem;
   }
 
   .aer-panel__content {
     display: grid;
-    gap: 1rem;
+    gap: 0.8rem;
     color: rgba(245, 245, 245, 0.82);
-    font-size: 0.95rem;
-    line-height: 1.65;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    word-break: break-word;
+    margin-bottom: 0;
   }
 
   .aer-list {
@@ -719,8 +796,8 @@
   }
 
   .aer-content--subpage {
-    padding-top: 2rem;
-    gap: 1.5rem;
+    padding-top: 1.5rem;
+    gap: 1.35rem;
   }
 
   .aer-subpage__title {
@@ -734,7 +811,7 @@
   }
 
   .aer-subpage__body {
-    gap: 1.4rem;
+    gap: 1.1rem;
   }
 
   .aer-panel {
@@ -826,7 +903,7 @@
   }
 
   .aer-logo {
-    width: clamp(170px, 60vw, 260px);
+    width: clamp(150px, 65vw, 220px);
   }
 }
 
@@ -918,7 +995,7 @@
     }
 
     .aer-artist__media {
-      justify-items: flex-start;
+      justify-items: center;
     }
   }
 
@@ -930,7 +1007,7 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    border-radius: 4px;
+    border-radius: 50%;
   }
 
   .aer-artist__thumb img {
@@ -945,10 +1022,10 @@
 
   .aer-portrait {
     position: relative;
-    width: clamp(260px, 32vw, 400px);
+    width: clamp(200px, 26vw, 320px);
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: 50%;
     margin: 0;
     transition:
       transform 220ms var(--transition-ease),
@@ -956,7 +1033,7 @@
   }
 
   .aer-portrait img {
-    object-fit: contain;
+    object-fit: cover;
     inset: 0;
     position: absolute;
     transition: transform 220ms var(--transition-ease);
@@ -1051,6 +1128,7 @@
     border: 0;
     border-radius: 0;
     background: rgba(12, 12, 12, 0.9);
+    min-width: 0;
   }
 
   .aer-release__header {
@@ -1128,6 +1206,13 @@
   .aer-release__embeds {
     display: grid;
     gap: 1.1rem;
+    min-width: 0;
+  }
+
+  .aer-release__embeds iframe {
+    max-width: 100%;
+    width: 100%;
+    display: block;
   }
 
   .aer-artist-layout {
@@ -1135,16 +1220,6 @@
     gap: clamp(2rem, 4vw, 3.4rem);
     grid-template-columns: clamp(220px, 30vw, 320px) minmax(0, 1fr);
     align-items: start;
-  }
-
-  @media (max-width: 1024px) {
-    .aer-artist-layout {
-      grid-template-columns: 1fr;
-    }
-
-    .aer-artist-media {
-      margin-top: 0;
-    }
   }
 
   .aer-artist-media {
@@ -1155,6 +1230,16 @@
     justify-items: start;
     margin-top: -2.5rem;
   }
+  @media (max-width: 1024px) {
+    .aer-artist-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .aer-artist-media {
+      margin-top: 0;
+      justify-items: center;
+    }
+  }
 
   .aer-artist-content {
     display: grid;
@@ -1164,7 +1249,15 @@
   .aer-featured-release-grid {
     display: grid;
     gap: 1.4rem;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    align-items: stretch;
+    justify-items: stretch;
+  }
+
+  @media (min-width: 900px) {
+    .aer-featured-release-grid {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
   }
 
   .aer-featured-release {
