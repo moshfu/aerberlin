@@ -1,11 +1,33 @@
+import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { getEvents } from "@/server/sanity";
 import type { SanityEvent } from "@/lib/sanity.types";
-import { cn, formatDateTime } from "@/lib/utils";
+import { absoluteUrl, cn, formatDateTime } from "@/lib/utils";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
+import { buildCanonical } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const url = buildCanonical(`/${locale}/events`);
+  return {
+    title: "AER Events in Berlin",
+    description: "Upcoming and past AER Kollektiv Berlin events, artists, schedules, and tickets.",
+    keywords: ["aer events", "aer kollektiv events", "aer event tickets", "berlin trance events", "aer berlin shows"],
+    alternates: { canonical: url },
+    openGraph: {
+      url,
+      title: "AER Kollektiv Berlin Events",
+      description: "Browse the AER Kollektiv Berlin calendar, archive, and tickets.",
+    },
+    twitter: {
+      title: "AER Kollektiv Berlin Events",
+      description: "Upcoming and past AER events, artists, and ticket links.",
+    },
+  };
+}
 
 export default async function EventsPage({
   params,
@@ -33,35 +55,41 @@ export default async function EventsPage({
 
   // Top navigation not shown on this page
 
+  const orderedEvents = (status === "past" ? past : upcoming).sort((a, b) =>
+    status === "past"
+      ? +new Date(b.start) - +new Date(a.start)
+      : +new Date(a.start) - +new Date(b.start)
+  );
+
   return (
-    <SubpageFrame
-      title={t("title")}
-      description={<p>{description}</p>}
-      marqueeText="// EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS //"
-      actions={
-        <EventFilters
-          status={status}
-          items={[
-            { label: t("filter.upcoming"), value: "upcoming" },
-            { label: t("filter.past"), value: "past" },
-          ]}
+    <>
+      <SubpageFrame
+        title={t("title")}
+        description={<p>{description}</p>}
+        marqueeText="// EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS // EVENTS //"
+        actions={
+          <EventFilters
+            status={status}
+            items={[
+              { label: t("filter.upcoming"), value: "upcoming" },
+              { label: t("filter.past"), value: "past" },
+            ]}
+          />
+        }
+      >
+        <EventsList
+          locale={locale}
+          events={orderedEvents}
+          ctaLabel={general("buyTickets")}
+          readMoreLabel={general("readMore")}
+          emptyLabel={t("noEvents")}
+          soldOutLabel={general("soldOut")}
+          salesNotStartedLabel={general("salesNotStarted")}
         />
-      }
-    >
-      <EventsList
-        locale={locale}
-        events={(status === "past" ? past : upcoming).sort((a, b) =>
-          status === "past"
-            ? +new Date(b.start) - +new Date(a.start)
-            : +new Date(a.start) - +new Date(b.start)
-        )}
-        ctaLabel={general("buyTickets")}
-        readMoreLabel={general("readMore")}
-        emptyLabel={t("noEvents")}
-        soldOutLabel={general("soldOut")}
-        salesNotStartedLabel={general("salesNotStarted")}
-      />
-    </SubpageFrame>
+      </SubpageFrame>
+
+      <EventsStructuredData locale={locale} events={orderedEvents} />
+    </>
   );
 }
 
@@ -135,10 +163,21 @@ function EventRailItem({
   });
   const soldOut = event.tags?.some((tag) => tag.toLowerCase().includes("sold"));
   const ticketSalesEnabled = event.ticketSalesOpen !== false;
+  const ticketSalesActive =
+    ticketSalesEnabled && new Date(event.end ?? event.start) >= new Date();
   const meta = `${startDate} · ${startTime} CET${event.venue ? ` · ${event.venue.toUpperCase()}` : ""}`;
   const lineupSummary = event.lineup?.length
     ? event.lineup.map((artist) => artist.name).join(" · ")
     : null;
+  const ctaHref = ticketSalesActive
+    ? event.ticketingSource === "pretix" && event.pretixTicketShopUrl
+      ? event.pretixTicketShopUrl
+      : event.ticketingSource === "external" && event.externalTicketUrl
+        ? event.externalTicketUrl
+        : `/tickets?event=${event.slug}`
+    : null;
+  const ctaIsExternal =
+    ctaHref !== null && (ctaHref.startsWith("http://") || ctaHref.startsWith("https://"));
 
   return (
     <article
@@ -166,17 +205,32 @@ function EventRailItem({
         >
           {readMoreLabel}
         </Link>
-        {ticketSalesEnabled ? (
-          <Link
-            href={`/tickets?event=${event.slug}`}
-            className={cn(
-              "aer-nav-button aer-rail__cta",
-              soldOut && "is-disabled",
-            )}
-            aria-disabled={soldOut}
-          >
-            {soldOut ? soldOutLabel : ctaLabel}
-          </Link>
+        {ctaHref ? (
+          ctaIsExternal ? (
+            <a
+              href={ctaHref}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(
+                "aer-nav-button aer-rail__cta",
+                soldOut && "is-disabled",
+              )}
+              aria-disabled={soldOut}
+            >
+              {soldOut ? soldOutLabel : ctaLabel}
+            </a>
+          ) : (
+            <Link
+              href={ctaHref}
+              className={cn(
+                "aer-nav-button aer-rail__cta",
+                soldOut && "is-disabled",
+              )}
+              aria-disabled={soldOut}
+            >
+              {soldOut ? soldOutLabel : ctaLabel}
+            </Link>
+          )
         ) : null}
         {!ticketSalesEnabled ? (
           <span className="text-[0.72rem] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.65)]">
@@ -185,6 +239,69 @@ function EventRailItem({
         ) : null}
       </div>
     </article>
+  );
+}
+
+function EventsStructuredData({ locale, events }: { locale: string; events: SanityEvent[] }) {
+  const baseUrl = absoluteUrl(`/${locale}/events`);
+  const itemList = events.slice(0, 15).map((event, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    url: absoluteUrl(`/${locale}/events/${event.slug}`),
+    name: event.title,
+    startDate: event.start,
+    endDate: event.end ?? undefined,
+    location: event.venue
+      ? {
+          "@type": "Place",
+          name: event.venue,
+        }
+      : undefined,
+  }));
+
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: absoluteUrl(`/${locale}`),
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Events",
+        item: baseUrl,
+      },
+    ],
+  };
+
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "AER Kollektiv Berlin events",
+    description: "Events and tickets from AER Kollektiv Berlin.",
+    url: baseUrl,
+    itemListElement: itemList,
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(data),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumb),
+        }}
+      />
+    </>
   );
 }
 

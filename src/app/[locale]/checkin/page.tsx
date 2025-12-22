@@ -1,9 +1,12 @@
 import { redirect } from "@/i18n/routing";
 import { auth } from "@/lib/auth";
-import { env } from "@/lib/env";
+import { serverConfig } from "@/server/config";
 import { CheckInClient } from "./checkin-client";
 import { getEvents } from "@/server/sanity";
+import { getPretixEventTitles } from "@/server/pretix";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
+
+export const dynamic = "force-dynamic";
 
 export default async function CheckInPage({
   params,
@@ -12,9 +15,9 @@ export default async function CheckInPage({
 }) {
   const { locale } = await params;
   const session = await auth();
-  if (!session?.user && env.USE_MOCK_AUTH !== "true") {
+  if (!session?.user && !serverConfig.useMockAuth) {
     redirect({
-      href: { pathname: "/auth/sign-in", query: { callbackUrl: "/checkin" } },
+      href: { pathname: "/auth/sign-in", query: { callbackUrl: `/${locale}/checkin` } },
       locale,
     });
   }
@@ -23,11 +26,12 @@ export default async function CheckInPage({
   }
 
   const events = await getEvents();
+  const pretixNames = await getPretixEventTitles();
 
   const eventOptions = events
     .filter((event) => event.pretixEventId)
     .map((event) => ({
-      title: event.title,
+      title: pretixNames.get(event.pretixEventId!) ?? event.title,
       slug: event.slug,
       pretixEventId: event.pretixEventId!,
     }));

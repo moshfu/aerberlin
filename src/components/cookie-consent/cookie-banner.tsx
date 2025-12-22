@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { COOKIE_CONSENT_COOKIE, type CookieConsentValue } from "@/lib/cookie-consent";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ function persistConsent(value: CookieConsentValue) {
 
 export function CookieBanner({ className }: { className?: string }) {
   const [visible, setVisible] = useState(false);
+  const locale = useLocale();
 
   useEffect(() => {
     if (!getStoredConsent()) {
@@ -71,7 +73,7 @@ export function CookieBanner({ className }: { className?: string }) {
         </p>
         <p>
           See the full policy in our{" "}
-          <Link href="/privacy" className="text-accent underline underline-offset-4">
+          <Link href={`/${locale}/privacy`} className="text-accent underline underline-offset-4">
             privacy section
           </Link>
           .

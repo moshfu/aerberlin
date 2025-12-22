@@ -40,10 +40,11 @@ export default async function HomePage() {
         {siteConfig.brand.logo ? (
           <SpinningMark
             size={720}
-            orbitScale={0.85}
+            orbitScale={0.82}
             className="aer-logo aer-logo--home"
             imageSrc={siteConfig.brand.logo}
             imageAlt={`${siteConfig.name} logo`}
+            responsive
           />
         ) : null}
 

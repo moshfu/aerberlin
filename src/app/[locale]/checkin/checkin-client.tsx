@@ -59,15 +59,46 @@ export function CheckInClient({ events }: CheckInClientProps) {
     );
   }
 
+  function extractSecret(raw: string) {
+    if (!raw) return "";
+    const cleaned = raw.trim();
+    const tryUrl = (value: string) => {
+      try {
+        const url = new URL(value);
+        const params = url.searchParams;
+        const fromParams =
+          params.get("secret") ||
+          params.get("token") ||
+          params.get("code") ||
+          params.get("c");
+        const pathParts = url.pathname.split("/").filter(Boolean);
+        return fromParams || pathParts[pathParts.length - 1] || "";
+      } catch {
+        return "";
+      }
+    };
+    const fromUrl = tryUrl(cleaned);
+    if (fromUrl) return fromUrl;
+    const firstToken = cleaned.split(/\s+/)[0];
+    if (firstToken && firstToken !== cleaned) {
+      const retryUrl = tryUrl(firstToken);
+      if (retryUrl) return retryUrl;
+      return firstToken;
+    }
+    return cleaned;
+  }
+
   async function handleCode(scanned: string) {
     if (!scanned || state === "loading" || !eventSlug) return;
-    setCode(scanned);
+    const secret = extractSecret(scanned);
+    setCode(secret);
     setState("loading");
     try {
+      setScanEnabled(false);
       const response = await fetch("/api/tickets/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: scanned, eventSlug }),
+        body: JSON.stringify({ code: secret, eventSlug }),
       });
       const data: TicketResponse = await response.json();
       if (response.ok) {
@@ -81,6 +112,9 @@ export function CheckInClient({ events }: CheckInClientProps) {
       console.error(error);
       setState("error");
       setResult({ status: "error", message: "Network error" });
+    } finally {
+      // Allow new scans after processing completes.
+      setScanEnabled(true);
     }
   }
 

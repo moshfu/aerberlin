@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { env } from "@/lib/env";
+import { serverConfig } from "@/server/config";
 import { markOrderCompleted } from "@/server/tickets";
 
 export async function POST(request: Request) {
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   let event;
   try {
     if (!signature) throw new Error("Missing signature");
-    event = stripe.webhooks.constructEvent(body, signature, env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(body, signature, serverConfig.stripeWebhookSecret);
   } catch (error) {
     console.error("Stripe webhook error", error);
     return NextResponse.json({ message: "Invalid signature" }, { status: 400 });

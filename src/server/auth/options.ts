@@ -5,34 +5,63 @@ import EmailProvider from "next-auth/providers/email";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { createTransport } from "nodemailer";
-import { env } from "@/lib/env";
+import { serverConfig } from "@/server/config";
 import { prisma } from "@/lib/prisma";
 
-const useMockAuth = env.USE_MOCK_AUTH === "true";
-const MOCK_ADMIN_HASH = "$2b$10$E6gTn6zkRgZNpmjDoE7Yd.8iTIQ6kGsE2wVqbodIZ6hO6PvxI6Bjq"; // "admin"
+const useMockAuth = serverConfig.useMockAuth;
+const adminEmail = serverConfig.adminEmail;
+const adminPasswordHash = serverConfig.adminPasswordHash;
 
-const adminEmail = env.ADMIN_EMAIL ?? (useMockAuth ? "admin@mock.local" : undefined);
-const adminPasswordHash = env.ADMIN_PASSWORD_HASH ?? (useMockAuth ? MOCK_ADMIN_HASH : undefined);
+const MAX_LOGIN_FAILURES = 5;
+const LOGIN_BLOCK_MS = 60_000;
 
-if (!useMockAuth && (!adminEmail || !adminPasswordHash)) {
-  throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD_HASH must be configured when USE_MOCK_AUTH=false");
-}
+const loginFailures = new Map<string, { attempts: number; blockedUntil?: number }>();
+
+const now = () => Date.now();
+
+const isBlocked = (key: string) => {
+  const entry = loginFailures.get(key);
+  if (!entry?.blockedUntil) {
+    return false;
+  }
+  if (entry.blockedUntil > now()) {
+    return true;
+  }
+  loginFailures.delete(key);
+  return false;
+};
+
+const noteFailure = (key: string) => {
+  const entry = loginFailures.get(key) ?? { attempts: 0 };
+  entry.attempts += 1;
+  if (entry.attempts >= MAX_LOGIN_FAILURES) {
+    entry.blockedUntil = now() + LOGIN_BLOCK_MS;
+  }
+  loginFailures.set(key, entry);
+};
+
+const resetFailures = (key: string) => {
+  loginFailures.delete(key);
+};
+
+const throttleError = () =>
+  new Error("Too many failed attempts. Please wait a minute before trying again.");
 
 const transporter = createTransport({
-  host: env.EMAIL_SERVER_HOST,
-  port: env.EMAIL_SERVER_PORT,
+  host: serverConfig.emailServerHost,
+  port: serverConfig.emailServerPort,
   auth: {
-    user: env.EMAIL_SERVER_USER,
-    pass: env.EMAIL_SERVER_PASSWORD,
+    user: serverConfig.emailServerUser,
+    pass: serverConfig.emailServerPassword,
   },
 });
 
 export const authOptions: NextAuthOptions = {
   adapter: useMockAuth ? undefined : PrismaAdapter(prisma),
   session: {
-    strategy: useMockAuth ? "jwt" : "database",
+    strategy: "jwt",
   },
-  secret: env.NEXTAUTH_SECRET,
+  secret: serverConfig.nextAuthSecret,
   pages: {
     signIn: "/auth/sign-in",
     verifyRequest: "/auth/verify",
@@ -46,18 +75,30 @@ export const authOptions: NextAuthOptions = {
       },
       authorize: async (credentials) => {
         if (!credentials?.email || !credentials?.password) {
+          console.warn("[auth] Missing credentials payload");
           return null;
         }
-        if (!adminEmail || credentials.email !== adminEmail) {
+
+        const throttleKey = credentials.email.toLowerCase();
+        if (isBlocked(throttleKey)) {
+          throw throttleError();
+        }
+
+        const matchesEmail = credentials.email === adminEmail;
+        if (!matchesEmail) {
+          noteFailure(throttleKey);
+          console.warn("[auth] Email mismatch", { email: credentials.email, expected: adminEmail });
           return null;
         }
-        if (!adminPasswordHash) {
-          return null;
-        }
+
         const valid = await bcrypt.compare(credentials.password, adminPasswordHash);
         if (!valid) {
+          noteFailure(throttleKey);
           return null;
         }
+
+        resetFailures(throttleKey);
+
         if (useMockAuth) {
           return {
             id: "mock-admin",
@@ -81,11 +122,11 @@ export const authOptions: NextAuthOptions = {
       },
     }),
     EmailProvider({
-      from: env.EMAIL_SERVER_USER,
+      from: serverConfig.emailServerUser,
       sendVerificationRequest: async ({ identifier, url }) => {
         await transporter.sendMail({
           to: identifier,
-          from: `aer berlin access <${env.EMAIL_SERVER_USER}>`,
+          from: `aer berlin access <${serverConfig.emailServerUser}>`,
           subject: "Your aer berlin secure login link",
           text: `Sign in to aer berlin: ${url}`,
           html: `<p>Secure link for the aer berlin console.</p><p><a href="${url}">Sign in</a></p>`,
@@ -108,6 +149,20 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ user }) {
       return Boolean(user.email);
+    },
+    async redirect({ url, baseUrl }) {
+      try {
+        const target = new URL(url, baseUrl);
+        const base = new URL(baseUrl);
+        // Ensure we stay on our host; fall back to base if cross-origin is attempted.
+        if (target.origin !== base.origin) return baseUrl;
+        // Force locale prefix (only "en" today) when missing.
+        const pathname = target.pathname.startsWith("/en/") ? target.pathname : `/en${target.pathname}`;
+        target.pathname = pathname.replace(/\/\/+/g, "/");
+        return target.toString();
+      } catch {
+        return baseUrl;
+      }
     },
     async jwt({ token, user }) {
       if (user) {

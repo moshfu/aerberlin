@@ -1,13 +1,13 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { buildCanonical } from "@/lib/seo";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function absoluteUrl(path: string) {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://aer.berlin";
-  return new URL(path, base).toString();
+  return buildCanonical(path);
 }
 
 export function formatCurrency(value: number | null | undefined, locale = "en", currency = "EUR") {

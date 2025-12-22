@@ -2,9 +2,19 @@ import type {
   SanityArtist,
   SanityEvent,
   SanityGalleryItem,
+  SanityImage,
   SanityPage,
   SanityRelease,
 } from "@/lib/sanity.types";
+
+const localImage = (path: string): SanityImage => ({
+  _type: "image",
+  asset: {
+    _ref: `local-${path.replace(/[^a-z0-9]+/gi, "-")}`,
+    _type: "reference",
+    url: path,
+  },
+});
 
 export const mockArtists: SanityArtist[] = [
   {
@@ -18,8 +28,8 @@ export const mockArtists: SanityArtist[] = [
       instagram: "https://www.instagram.com/funk4official/",
       soundcloud: "https://soundcloud.com/funk4official",
     },
-    portrait: undefined,
-    gallery: [],
+    portrait: localImage("/media/hero-backdrop1.jpg"),
+    gallery: [localImage("/media/hero-backdrop2.jpg")],
     featuredReleases: [],
     bio: [
       {
@@ -63,8 +73,8 @@ export const mockArtists: SanityArtist[] = [
       instagram: "https://www.instagram.com/funicmusic/",
       soundcloud: "https://soundcloud.com/funicmusic",
     },
-    portrait: undefined,
-    gallery: [],
+    portrait: localImage("/media/hero-backdrop3.jpg"),
+    gallery: [localImage("/media/hero-backdrop4.jpg")],
     featuredReleases: [],
     bio: [
       {
@@ -108,8 +118,8 @@ export const mockArtists: SanityArtist[] = [
       instagram: "https://www.instagram.com/5kyy1arr/",
       soundcloud: "https://soundcloud.com/skylar-ashton",
     },
-    portrait: undefined,
-    gallery: [],
+    portrait: localImage("/media/aer-logo.jpg"),
+    gallery: [localImage("/media/aer_banner_png.png")],
     featuredReleases: [],
     bio: [
       {
@@ -174,7 +184,7 @@ export const mockEvents: SanityEvent[] = [
     pretixTicketShopUrl: "https://pretix.invalid/aer/aer-000",
     ticketSalesOpen: true,
     published: true,
-    poster: undefined,
+    poster: localImage("/media/hero-backdrop1.jpg"),
     lineup: [mockArtists[0]],
     gallery: [],
     tags: ["Archive", "Trance"],
@@ -211,7 +221,7 @@ export const mockEvents: SanityEvent[] = [
     tags: ["Trance", "Open-air"],
     ageLimit: "18+",
     published: true,
-    poster: undefined,
+    poster: localImage("/media/hero-backdrop2.jpg"),
     lineup: [mockArtists[0], mockArtists[1]],
     gallery: [],
     accentColor: "#C4FF17",
@@ -260,7 +270,7 @@ export const mockEvents: SanityEvent[] = [
     pretixTicketShopUrl: "https://pretix.invalid/aer/aer-002",
     ticketSalesOpen: true,
     published: true,
-    poster: undefined,
+    poster: localImage("/media/hero-backdrop3.jpg"),
     lineup: [mockArtists[0], mockArtists[1], mockArtists[2]],
     gallery: [],
     tags: ["Trance"],
@@ -273,16 +283,31 @@ export const mockReleases: SanityRelease[] = [
     title: "Emerald Vector",
     slug: "emerald-vector",
     date: new Date().toISOString(),
-    cover: undefined,
+    cover: localImage("/media/aer-logo.jpg"),
     description: [],
     credits: [],
     links: {
-      soundcloud: "https://soundcloud.com/aerberlin/emerald-vector",
-      spotify: "https://open.spotify.com/album/mock",
+      soundcloud: "https://soundcloud.com/aer-berlin/aer-signal-001",
     },
     tracks: [
       { title: "Emerald Vector", duration: "05:32" },
       { title: "Accelerant", duration: "06:14" },
+    ],
+  },
+  {
+    _id: "release-spectrum",
+    title: "Spectrum Pulse",
+    slug: "spectrum-pulse",
+    date: new Date("2024-04-10T00:00:00.000Z").toISOString(),
+    cover: localImage("/media/hero-backdrop2.jpg"),
+    description: [],
+    credits: [],
+    links: {
+      soundcloud: "https://soundcloud.com/aer-berlin/aer-signal-002",
+    },
+    tracks: [
+      { title: "Spectrum Pulse", duration: "06:02" },
+      { title: "Aurora Bloom", duration: "04:58" },
     ],
   },
 ];
@@ -293,8 +318,9 @@ export const mockGallery: SanityGalleryItem[] = [
     media: {
       _type: "image",
       asset: {
-        _ref: "image-abc",
+        _ref: "local-gallery-frame",
         _type: "reference",
+        url: "/media/hero-backdrop4.jpg",
       },
     },
     caption: "Strobe bloom at WIRED",

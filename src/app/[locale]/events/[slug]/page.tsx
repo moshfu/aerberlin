@@ -9,13 +9,15 @@ import { siteConfig } from "@/config/site";
 import { urlFor } from "@/lib/sanity.server";
 import { getEventBySlug, getEvents } from "@/server/sanity";
 import { absoluteUrl, formatDateTime, cn } from "@/lib/utils";
+import { buildCanonical } from "@/lib/seo";
 import type { SanityEvent } from "@/lib/sanity.types";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 interface EventPageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
-
-export const revalidate = 120;
 
 export async function generateStaticParams() {
   const events = await getEvents();
@@ -44,12 +46,16 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
   const imageUrl = event.poster?.asset
     ? urlFor(event.poster).width(1200).height(1600).quality(80).url()
     : "/og.jpg";
+  const canonical = buildCanonical(`/${locale}/events/${slug}`);
   return {
     title,
     description,
+    keywords: ["aer event", "aer kollektiv", "berlin trance event", event.title],
+    alternates: { canonical },
     openGraph: {
       title,
       description,
+      url: canonical,
       images: [
         {
           url: imageUrl,
@@ -63,6 +69,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
       title,
       description,
       images: [imageUrl],
+      site: canonical,
     },
   };
 }
@@ -185,14 +192,11 @@ export default async function EventPage({ params }: EventPageProps) {
   }
   // Calendar link intentionally omitted per requirements
 
-  const accessLinks: ActionLink[] = buyTicketsLink
-    ? [{ ...buyTicketsLink }]
-    : [
-        {
-          label: ticketSalesEnabled ? general("soldOut") : general("salesNotStarted"),
-          disabled: true,
-        },
-      ];
+  const accessNote = !buyTicketsLink && ticketSalesEnabled === false
+    ? general("salesNotStarted")
+    : null;
+
+  const accessLinks: ActionLink[] = buyTicketsLink ? [{ ...buyTicketsLink }] : [];
 
   return (
     <>
@@ -257,11 +261,16 @@ export default async function EventPage({ params }: EventPageProps) {
               <PortableTextContent value={event.description} className="aer-panel__content space-y-4" />
             </article>
 
-            {(accessLinks.length || event.address || event.ageLimit) ? (
+            {(accessLinks.length || event.address || event.ageLimit || accessNote) ? (
               <section className="aer-panel event-detail__panel">
                 <div className="aer-panel__meta">Access</div>
                 <div className="event-detail__actions">
                   {accessLinks.map(renderActionLink)}
+                  {accessNote ? (
+                    <span className="text-[0.78rem] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.78)]">
+                      {accessNote}
+                    </span>
+                  ) : null}
                   {event.address ? (
                     <a
                       className="aer-nav-button aer-nav-button--compact event-action-link event-map-link"
@@ -301,53 +310,110 @@ export default async function EventPage({ params }: EventPageProps) {
         </div>
       </SubpageFrame>
 
-      <StructuredData event={event} />
+      <EventStructuredData event={event} locale={locale} />
     </>
   );
 }
 
-function StructuredData({ event }: { event: SanityEvent }) {
-  const start = new Date(event.start).toISOString();
-  const end = event.end ? new Date(event.end).toISOString() : undefined;
+function EventStructuredData({ event, locale }: { event: SanityEvent; locale: string }) {
+  const url = absoluteUrl(`/${locale}/events/${event.slug}`);
+  const image = event.poster?.asset
+    ? urlFor(event.poster).width(1200).height(1600).quality(80).url()
+    : undefined;
+  const lineupNames = event.lineup?.map((artist) => artist.name).filter(Boolean) ?? [];
+  const description =
+    typeof event.description === "string"
+      ? event.description
+      : lineupNames.length
+        ? lineupNames.join(" · ")
+        : event.title;
+  const eventStatus =
+    new Date(event.end ?? event.start) < new Date()
+      ? "https://schema.org/EventCompleted"
+      : "https://schema.org/EventScheduled";
+  const soldOut = event.tags?.some((tag) => tag.toLowerCase().includes("sold")) ?? false;
+  const availability = soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock";
+  const ticketUrl =
+    event.ticketingSource === "external"
+      ? event.externalTicketUrl
+      : event.ticketingSource === "pretix"
+        ? event.pretixTicketShopUrl
+        : undefined;
 
-  const data = {
+  const eventSchema = {
     "@context": "https://schema.org",
     "@type": "MusicEvent",
     name: event.title,
-    startDate: start,
-    endDate: end,
-    location: {
-      "@type": "MusicVenue",
-      name: event.venue,
-      address: event.address,
-    },
-    performer: event.lineup?.map((artist) => ({
-      "@type": "MusicGroup",
-      name: artist.name,
-    })),
-    eventStatus: "https://schema.org/EventScheduled",
+    startDate: new Date(event.start).toISOString(),
+    endDate: event.end ? new Date(event.end).toISOString() : undefined,
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    eventStatus,
+    location: event.venue
+      ? {
+          "@type": "Place",
+          name: event.venue,
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Berlin",
+            addressCountry: "DE",
+          },
+        }
+      : undefined,
+    image: image ? [image] : undefined,
+    description,
     organizer: {
       "@type": "Organization",
       name: siteConfig.name,
-      url: absoluteUrl("/"),
+      url: absoluteUrl(`/${locale}`),
     },
-    offers: {
-      "@type": "Offer",
-      url:
-        event.ticketingSource === "external" && event.externalTicketUrl
-          ? event.externalTicketUrl
-          : absoluteUrl(`/tickets?event=${event.slug}`),
-      priceCurrency: event.tiers?.[0]?.currency ?? "EUR",
-      availabilityStarts: start,
-    },
+    performer: lineupNames.map((name) => ({ "@type": "MusicGroup", name })),
+    offers: ticketUrl
+      ? [
+          {
+            "@type": "Offer",
+            url: ticketUrl,
+            availability,
+          },
+        ]
+      : undefined,
+    url,
+  };
+
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: absoluteUrl(`/${locale}`),
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Events",
+        item: absoluteUrl(`/${locale}/events`),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: event.title,
+        item: url,
+      },
+    ],
   };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(data, null, 2),
-      }}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+      />
+    </>
   );
 }

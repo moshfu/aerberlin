@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { env } from "@/lib/env";
+import { serverConfig } from "@/server/config";
 import { getPretix, getPretixList, postPretix } from "@/lib/pretix/client";
 import type {
   PretixEvent,
@@ -8,8 +8,10 @@ import type {
 } from "@/lib/pretix/types";
 import { mockEvents } from "@/server/fixtures";
 
-const organizerBase = `/organizers/${env.PRETIX_ORGANIZER_SLUG}`;
-const useMockPretix = env.USE_MOCK_PRETIX === "true";
+const envBase = serverConfig.pretixApiUrl.replace(/\/$/, "");
+const organizerIncluded = envBase.includes("/organizers/");
+const organizerBase = organizerIncluded ? "" : `/organizers/${serverConfig.pretixOrganizerSlug}`;
+const useMockPretix = serverConfig.useMockPretix;
 
 export const getPretixEvents = cache(async () => {
   if (useMockPretix) {
@@ -25,8 +27,34 @@ export const getPretixEvents = cache(async () => {
         plugins: [],
       })) satisfies PretixEvent[];
   }
-  return getPretixList<PretixEvent>(`${organizerBase}/events/`);
+  try {
+    return await getPretixList<PretixEvent>(`${organizerBase}/events/`);
+  } catch (error) {
+    console.error("Pretix events fetch failed", error);
+    return [];
+  }
 });
+
+// Convenience lookup map by event slug.
+export const getPretixEventTitles = cache(async () => {
+  const events = await getPretixEvents();
+  return new Map(events.map((event) => [event.slug, event.name?.en ?? event.slug]));
+});
+
+export async function getPretixCheckinListId(eventSlug: string) {
+  if (useMockPretix) return serverConfig.pretixCheckinListId;
+  try {
+    const lists = await getPretixList<{ id: number; name: string }>(
+      `${organizerBase}/events/${eventSlug}/checkinlists/`,
+    );
+    if (lists?.length) {
+      return String(lists[0].id);
+    }
+  } catch (error) {
+    console.error("Pretix check-in lists fetch failed", error);
+  }
+  return serverConfig.pretixCheckinListId;
+}
 
 export async function getPretixProducts(eventSlug: string) {
   if (useMockPretix) {
@@ -144,18 +172,30 @@ export async function scanPretixTicket(eventSlug: string, secret: string) {
       order: "MOCK123",
     };
   }
-  return postPretix<{
-    status: string;
-    reason?: string;
-    redeemed: boolean;
-    attendee?: string;
-    order?: string;
-  }>(
-    `${organizerBase}/events/${eventSlug}/checkinlists/${env.PRETIX_CHECKIN_LIST_ID}/positions/scan/`,
-    {
-      secret,
-      source_type: "qr",
-      force: false,
-    },
-  );
+  const listId = await getPretixCheckinListId(eventSlug);
+  const lists = [listId];
+  try {
+    return await postPretix<{
+      status: string;
+      reason?: string;
+      reason_explanation?: string | null;
+      position?: { attendee_name?: string; order?: string };
+      require_attention?: boolean;
+      list?: { name?: string; id?: number };
+    }>(
+      `${organizerBase}/checkinrpc/redeem/`,
+      {
+        secret,
+        source_type: "barcode",
+        lists,
+        force: false,
+        ignore_unpaid: false,
+        questions_supported: false,
+      },
+      { allowErrorResponses: true },
+    );
+  } catch (error) {
+    console.error("Pretix redeem failed", error);
+    return { status: "error", reason: "invalid" } as const;
+  }
 }

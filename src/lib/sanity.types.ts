@@ -5,6 +5,7 @@ export interface SanityImage {
   asset: {
     _ref: string;
     _type: "reference";
+    url?: string;
   };
   alt?: string;
   caption?: string;
@@ -116,6 +117,7 @@ export interface SanityGalleryItem {
     asset: {
       _ref: string;
       _type: "reference";
+      url?: string;
     };
     url?: string;
   };

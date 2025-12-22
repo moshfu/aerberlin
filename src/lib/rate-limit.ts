@@ -48,9 +48,9 @@ export function rateLimit(request: Request, options: RateLimitOptions = {}): Rat
 function getClientIp(request: Request) {
   const xff = request.headers.get("x-forwarded-for");
   if (xff) {
-    const [first] = xff.split(",").map((part) => part.trim()).filter(Boolean);
-    if (first) {
-      return first;
+    const parts = xff.split(",").map((part) => part.trim()).filter(Boolean);
+    if (parts.length > 0) {
+      return parts[parts.length - 1];
     }
   }
   const xfRealIp = request.headers.get("x-real-ip");

@@ -4,6 +4,7 @@ export interface PretixEvent {
   date_from: string;
   date_to?: string;
   location?: string;
+  currency?: string;
   is_public: boolean;
   plugins?: string[];
 }

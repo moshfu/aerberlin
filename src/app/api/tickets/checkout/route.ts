@@ -1,28 +1,31 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getEventBySlug } from "@/server/sanity";
-import { createPendingOrder, createStripeCheckout } from "@/server/tickets";
-import { env } from "@/lib/env";
+import {
+  createPendingOrder,
+  createStripeCheckout,
+  resolveCheckoutItems,
+} from "@/server/tickets";
+import { serverConfig } from "@/server/config";
 
 const requestSchema = z.object({
   eventSlug: z.string(),
   locale: z.string().default("en"),
   items: z
     .array(
-      z.object({
-        productId: z.number(),
-        name: z.string(),
-        price: z.number().nonnegative(),
-        currency: z.string().length(3),
-        quantity: z.number().int().positive(),
-      }),
+      z
+        .object({
+          productId: z.number(),
+          quantity: z.number().int().positive(),
+        })
+        .passthrough(),
     )
     .min(1),
 });
 
 export async function POST(request: Request) {
   try {
-    if (env.USE_MOCK_STRIPE === "true") {
+    if (serverConfig.useMockStripe) {
       return NextResponse.json(
         { message: "Checkout disabled in demo mode" },
         { status: 503 },
@@ -38,15 +41,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Tickets unavailable" }, { status: 400 });
     }
 
+    const normalizedItems = await resolveCheckoutItems(event, parsed.items);
+
     const order = await createPendingOrder({
       event,
-      items: parsed.items,
+      items: normalizedItems,
       locale: parsed.locale,
     });
 
     const session = await createStripeCheckout(order.id, {
       event,
-      items: parsed.items,
+      items: normalizedItems,
       locale: parsed.locale,
     });
 

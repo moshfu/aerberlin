@@ -1,10 +1,10 @@
 export const siteConfig = {
-  name: "aer berlin",
+  name: "AER Kollektiv Berlin",
   slug: "aerberlin",
   defaultLocale: "en" as const,
   locales: ["en"] as const,
   description:
-    "AER BERLIN: Precise sets. Heavy sound. Open floor.",
+    "AER Kollektiv Berlin is a Berlin trance collective delivering precision-curated club nights, artists, music releases, and events with heavy, open-floor energy.",
   brand: {
     tagline: "LIVE. CAPTURED. ARCHIVED.",
     accent: "#FF102A",

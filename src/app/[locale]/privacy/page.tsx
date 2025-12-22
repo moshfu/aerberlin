@@ -3,8 +3,31 @@ import { SubpageFrame } from "@/components/layout/subpage-frame";
 import { PortableTextContent } from "@/components/portable-text/portable-text";
 import { getPageBySlug } from "@/server/sanity";
 import { siteConfig } from "@/config/site";
+import type { Metadata } from "next";
+import { buildCanonical } from "@/lib/seo";
 
 export const revalidate = 600;
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const canonical = buildCanonical(`/${locale}/privacy`);
+  return {
+    title: "Privacy",
+    description: "Privacy policy and data protection information for AER Berlin.",
+    alternates: { canonical },
+    robots: {
+      index: false,
+      follow: false,
+      googleBot: {
+        index: false,
+        follow: false,
+        "max-snippet": 0,
+        "max-image-preview": "none",
+        "max-video-preview": 0,
+      },
+    },
+  };
+}
 
 const fallbackPrivacyContent = (contactEmail: string): PortableTextBlock[] => [
   {

@@ -3,15 +3,24 @@
 import { FormEvent, useState } from "react";
 import type { Route } from "next";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export default function SignInPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const localeFromPath = pathname?.split("/")[1] || "en";
   const rawCallbackUrl = searchParams.get("callbackUrl");
-  const callbackUrl = rawCallbackUrl && rawCallbackUrl.startsWith("/") ? rawCallbackUrl : "/";
+  const normalizeCallback = (value: string | null): string => {
+    if (!value || !value.startsWith("/")) return `/${localeFromPath}/checkin`;
+    // If callback is already locale-prefixed, use it; otherwise prepend locale.
+    const segments = value.split("/");
+    const hasLocalePrefix = segments[1]?.length === 2; // naive check, matches our locales
+    return hasLocalePrefix ? value : `/${localeFromPath}${value}`;
+  };
+  const callbackUrl = normalizeCallback(rawCallbackUrl);
   const callbackRoute = callbackUrl as Route;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,16 +34,14 @@ export default function SignInPage() {
     const result = await signIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirect: true,
       callbackUrl,
     });
-    if (result?.ok && !result.error) {
-      router.push(callbackRoute);
-      router.refresh();
-      return;
+    // With redirect: true, NextAuth will navigate on success.
+    if (result?.error) {
+      setStatus("error");
+      setErrorMessage(result.error ?? "Invalid credentials. Try again.");
     }
-    setStatus("error");
-    setErrorMessage(result?.error ?? "Invalid credentials. Try again.");
   };
 
   return (

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { env } from "@/lib/env";
+import { serverConfig } from "@/server/config";
 import { siteConfig } from "@/config/site";
 import { verifyHmacSignature } from "@/lib/webhook-signature";
 
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     !verifyHmacSignature({
       header: signatureHeader,
       payload: rawBody,
-      secret: env.SANITY_PREVIEW_SECRET,
+      secret: serverConfig.sanityPreviewSecret,
       algorithms: SANITY_SIGNATURE_ALGORITHMS,
     })
   ) {

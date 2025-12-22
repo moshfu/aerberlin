@@ -1,6 +1,20 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+const resolveAdminPasswordHash = () => {
+  if (process.env.ADMIN_PASSWORD_HASH) {
+    return process.env.ADMIN_PASSWORD_HASH;
+  }
+  if (process.env.ADMIN_PASSWORD_HASH_BASE64) {
+    try {
+      return Buffer.from(process.env.ADMIN_PASSWORD_HASH_BASE64, "base64").toString("utf8");
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+};
+
 export const env = createEnv({
   server: {
     NODE_ENV: z
@@ -38,7 +52,7 @@ export const env = createEnv({
     USE_MOCK_STRIPE: z.enum(["true", "false"]).default("true"),
     USE_MOCK_AUTH: z.enum(["true", "false"]).default("true"),
     ADMIN_EMAIL: z.string().email().optional(),
-    ADMIN_PASSWORD_HASH: z.string().min(20).optional(),
+    ADMIN_PASSWORD_HASH: z.string(),
     PREVIEW_USER: z.string().optional(),
     PREVIEW_PASS: z.string().optional(),
   },
@@ -86,7 +100,7 @@ export const env = createEnv({
     USE_MOCK_STRIPE: process.env.USE_MOCK_STRIPE,
     USE_MOCK_AUTH: process.env.USE_MOCK_AUTH,
     ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-    ADMIN_PASSWORD_HASH: process.env.ADMIN_PASSWORD_HASH,
+    ADMIN_PASSWORD_HASH: resolveAdminPasswordHash(),
     PREVIEW_USER: process.env.PREVIEW_USER,
     PREVIEW_PASS: process.env.PREVIEW_PASS,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

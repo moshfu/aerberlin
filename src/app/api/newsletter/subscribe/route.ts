@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { env } from "@/lib/env";
+import { serverConfig } from "@/server/config";
 import { rateLimit } from "@/lib/rate-limit";
 
 const schema = z.object({
@@ -31,15 +31,15 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, locale } = schema.parse(body);
 
-    if (env.USE_MOCK_AUTH === "true") {
+    if (serverConfig.useMockAuth) {
       return NextResponse.json({ success: true });
     }
 
-    if (env.BUTTONDOWN_API_KEY && env.BUTTONDOWN_AUDIENCE_ID) {
+    if (serverConfig.buttondownApiKey && serverConfig.buttondownAudienceId) {
       await fetch("https://api.buttondown.email/v1/subscribers", {
         method: "POST",
         headers: {
-          Authorization: `Token ${env.BUTTONDOWN_API_KEY}`,
+          Authorization: `Token ${serverConfig.buttondownApiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

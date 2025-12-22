@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { env } from "@/lib/env";
+import { serverConfig } from "@/server/config";
 import { verifyHmacSignature } from "@/lib/webhook-signature";
 
 const PRETIX_SIGNATURE_HEADER = "x-pretix-signature";
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     !verifyHmacSignature({
       header: signatureHeader,
       payload: rawBody,
-      secret: env.PRETIX_WEBHOOK_SECRET,
+      secret: serverConfig.pretixWebhookSecret,
       algorithms: PRETIX_SIGNATURE_ALGORITHMS,
     })
   ) {

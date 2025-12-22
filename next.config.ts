@@ -19,6 +19,8 @@ const connectSrcDomains = [
   "'self'",
   "https://cdn.sanity.io",
   "https://*.sanity.io",
+  "https://api.soundcloud.com",
+  "https://w.soundcloud.com",
   "https://plausible.io",
   "https://*.plausible.io",
   "https://www.googletagmanager.com",
@@ -39,6 +41,7 @@ const imageSrcDomains = [
   "data:",
   "blob:",
   "https://cdn.sanity.io",
+  "https://*.sndcdn.com",
   "https://images.prismic.io",
   "https://res.cloudinary.com",
   "https://i.scdn.co",
@@ -57,7 +60,7 @@ const csp = [
   "base-uri 'self';",
   "form-action 'self';",
   "frame-ancestors 'none';",
-  "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com;",
+  "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com https://w.soundcloud.com;",
   "worker-src 'self' blob:;",
   "upgrade-insecure-requests;",
 ].join(" ");
@@ -113,6 +116,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "i.scdn.co" },
       { protocol: "https", hostname: "i.ytimg.com" },
       { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "*.sndcdn.com" },
     ],
   },
   async headers() {

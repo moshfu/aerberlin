@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { env } from "@/lib/env";
+import { serverConfig } from "@/server/config";
 import {
   artistBySlugQuery,
   artistsQuery,
@@ -26,7 +26,7 @@ import {
   mockReleases,
 } from "@/server/fixtures";
 
-const useMockContent = env.USE_MOCK_SANITY === "true";
+const useMockContent = serverConfig.useMockSanity;
 
 async function fetchOrFallback<T>(fetcher: () => Promise<T>, fallback: () => T): Promise<T> {
   if (useMockContent) {
@@ -35,7 +35,7 @@ async function fetchOrFallback<T>(fetcher: () => Promise<T>, fallback: () => T):
   try {
     return await fetcher();
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
+    if (serverConfig.nodeEnv !== "production") {
       console.warn("Sanity fetch failed, serving mock data", error);
       return fallback();
     }
@@ -59,33 +59,34 @@ export const getHomepageData = cache(async () => {
   );
 });
 
-export const getEvents = cache(async () => {
+export async function getEvents() {
   return fetchOrFallback(
     () => sanityClient.fetch(eventsQuery) as Promise<SanityEvent[]>,
     () => mockEvents,
   );
-});
+}
 
-export const getEventBySlug = cache(async (slug: string) => {
+export async function getEventBySlug(slug: string) {
   if (useMockContent) {
     return mockEvents.find((event) => event.slug === slug) ?? null;
   }
   return sanityClient.fetch(eventBySlugQuery, { slug }) as Promise<SanityEvent | null>;
-});
+}
 
-export const getArtists = cache(async () => {
+export async function getArtists() {
+  // Do not memoize: we want Sanity edits (like name size/stretch tweaks) to show up immediately.
   return fetchOrFallback(
     () => sanityClient.fetch(artistsQuery) as Promise<SanityArtist[]>,
     () => mockArtists,
   );
-});
+}
 
-export const getArtistBySlug = cache(async (slug: string) => {
+export async function getArtistBySlug(slug: string) {
   if (useMockContent) {
     return mockArtists.find((artist) => artist.slug === slug) ?? null;
   }
   return sanityClient.fetch(artistBySlugQuery, { slug }) as Promise<SanityArtist | null>;
-});
+}
 
 export const getReleases = cache(async () => {
   return fetchOrFallback(

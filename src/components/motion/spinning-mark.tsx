@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
@@ -12,6 +12,7 @@ interface SpinningMarkProps {
   className?: string;
   imageSrc?: string | null;
   imageAlt?: string;
+  responsive?: boolean;
 }
 
 const ORBIT_TILT_X = 71;
@@ -30,10 +31,30 @@ export function SpinningMark({
   className,
   imageSrc,
   imageAlt,
+  responsive = false,
 }: SpinningMarkProps) {
+  const [computedSize, setComputedSize] = useState(size);
+
+  useEffect(() => {
+    if (!responsive) {
+      setComputedSize(size);
+      return;
+    }
+
+    const updateSize = () => {
+      const viewportWidth = window.innerWidth;
+      const target = viewportWidth >= 1024 ? size : Math.min(size, viewportWidth - 32);
+      setComputedSize(Math.max(180, target));
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, [responsive, size]);
+
   const normalizedOrbitScale = Math.max(0.4, orbitScale);
-  const orbitWidth = size * 1.35 * normalizedOrbitScale;
-  const orbitHeight = size * 1.02 * normalizedOrbitScale;
+  const orbitWidth = computedSize * 1.45 * normalizedOrbitScale;
+  const orbitHeight = computedSize * 1.1 * normalizedOrbitScale;
   const orbitOffsetY = 0.22 * normalizedOrbitScale;
   const radiusX = orbitWidth / 2;
   const radiusY = orbitHeight / 2;
@@ -183,8 +204,8 @@ export function SpinningMark({
         <Image
           src={resolvedSrc}
           alt={altText}
-          width={size}
-          height={size}
+          width={computedSize}
+          height={computedSize}
           className="pointer-events-none select-none object-cover"
           priority
         />
