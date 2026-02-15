@@ -2,16 +2,7 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const plausibleOrigin = parseOrigin(process.env.PLAUSIBLE_DOMAIN);
-const scriptSrcDomains = [
-  "https://plausible.io",
-  "https://*.plausible.io",
-  "https://www.googletagmanager.com",
-  "https://www.google-analytics.com",
-  "https://www.gstatic.com",
-  "https://www.google.com",
-  "https://js.stripe.com",
-  "https://checkout.stripe.com",
-]
+const scriptSrcDomains = ["https://plausible.io", "https://*.plausible.io", "https://js.stripe.com", "https://checkout.stripe.com"]
   .concat(plausibleOrigin ? [plausibleOrigin] : [])
   .join(" ");
 
@@ -23,11 +14,6 @@ const connectSrcDomains = [
   "https://w.soundcloud.com",
   "https://plausible.io",
   "https://*.plausible.io",
-  "https://www.googletagmanager.com",
-  "https://www.google-analytics.com",
-  "https://api.pretix.eu",
-  "https://pretix.eu",
-  "https://*.pretix.eu",
   "https://js.stripe.com",
   "https://api.stripe.com",
   "https://checkout.stripe.com",
@@ -106,7 +92,8 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   experimental: {
     serverActions: {
-      bodySizeLimit: "2mb",
+      bodySizeLimit: "64kb",
+      allowedOrigins: ["aerberlin.de", "www.aerberlin.de"],
     },
   },
   images: {

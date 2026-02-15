@@ -1,8 +1,8 @@
 import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
-import { getClientIp } from "./src/middleware/client-ip";
-import { serverConfig } from "./src/server/config";
-import { i18nConfig } from "./src/i18n/config";
+import { getClientIp } from "./middleware/client-ip";
+import { serverConfig } from "./server/config";
+import { i18nConfig } from "./i18n/config";
 
 const canonicalHost = (() => {
   try {
@@ -12,6 +12,67 @@ const canonicalHost = (() => {
     return null;
   }
 })();
+
+const getHostInfo = (host: string | null | undefined) => {
+  if (!host) return null;
+  const trimmed = host.split(",")[0].trim();
+  if (!trimmed) return null;
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith("[")) {
+    const endIndex = lower.indexOf("]");
+    if (endIndex === -1) return null;
+    const hostname = lower.slice(1, endIndex);
+    const rest = lower.slice(endIndex + 1);
+    const port = rest.startsWith(":") ? rest.slice(1) : undefined;
+    return { raw: trimmed, hostname, port };
+  }
+  const [hostname, port] = lower.split(":");
+  return { raw: trimmed, hostname, port };
+};
+
+const isLocalHost = (host: string | null | undefined) => {
+  const info = getHostInfo(host);
+  if (!info) return false;
+  const { hostname } = info;
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "0.0.0.0" ||
+    hostname === "::1"
+  );
+};
+
+const getRequestHost = (request: NextRequest) => {
+  const host = request.headers.get("host");
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const normalizedHost = getHostInfo(host)?.raw ?? null;
+  const normalizedForwarded = getHostInfo(forwardedHost)?.raw ?? null;
+
+  if (!normalizedHost) {
+    return normalizedForwarded;
+  }
+
+  if (normalizedForwarded && isLocalHost(normalizedHost) && !isLocalHost(normalizedForwarded)) {
+    return normalizedForwarded;
+  }
+
+  return normalizedHost;
+};
+
+const applyRequestHost = (url: URL, requestHost: string | null) => {
+  const info = getHostInfo(requestHost);
+  if (!info) return;
+  url.hostname = info.hostname;
+  url.port = isLocalHost(requestHost) ? info.port ?? "" : "";
+};
+
+const getRequestProtocol = (request: NextRequest, requestHost: string | null) => {
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0].trim();
+  if (forwardedProto && !isLocalHost(requestHost)) {
+    return forwardedProto;
+  }
+  return request.nextUrl.protocol.replace(":", "");
+};
 
 const intlMiddleware = createMiddleware({
   locales: i18nConfig.locales,
@@ -80,18 +141,46 @@ const enforceBasicAuth = (request: NextRequest) => {
 
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const requestHost = request.headers.get("host");
+  const requestHost = getRequestHost(request);
+  const method = request.method.toUpperCase();
+  const contentType = request.headers.get("content-type") ?? "";
+  const hasActionHeader = request.headers.has("next-action");
+  const isApiRoute = pathname.startsWith("/api");
+  const isStudioRoute = pathname.startsWith("/studio");
 
-  const isLocalHost = requestHost?.startsWith("localhost") || requestHost?.startsWith("127.0.0.1");
+  // Block unexpected non-idempotent methods on non-API routes to prevent
+  // server-action abuse on generic POSTs.
+  if (!isApiRoute && !isStudioRoute && !["GET", "HEAD", "OPTIONS"].includes(method)) {
+    return new NextResponse("Method Not Allowed", { status: 405 });
+  }
+
+  // Explicitly reject requests that would be treated as Server Actions by Next.js.
+  if (
+    !isApiRoute &&
+    method === "POST" &&
+    (hasActionHeader ||
+      contentType.startsWith("application/x-www-form-urlencoded") ||
+      contentType.startsWith("multipart/form-data"))
+  ) {
+    return new NextResponse("Method Not Allowed", { status: 405 });
+  }
+
+  const isRequestLocalHost = isLocalHost(requestHost);
+  const isCanonicalLocalHost = isLocalHost(canonicalHost);
   const shouldRedirectHost =
     canonicalHost &&
     requestHost &&
-    !isLocalHost &&
+    !isRequestLocalHost &&
     requestHost !== canonicalHost &&
-    !requestHost.endsWith(".vercel.app");
+    !requestHost.endsWith(".vercel.app") &&
+    !isCanonicalLocalHost;
 
   if (shouldRedirectHost) {
     const url = request.nextUrl.clone();
+    const requestProtocol = getRequestProtocol(request, requestHost);
+    if (requestProtocol) {
+      url.protocol = requestProtocol;
+    }
     url.host = canonicalHost!;
     return NextResponse.redirect(url, 301);
   }
@@ -136,6 +225,11 @@ export default function middleware(request: NextRequest) {
 
   if (shouldRewriteToDefault) {
     const url = request.nextUrl.clone();
+    const requestProtocol = getRequestProtocol(request, requestHost);
+    applyRequestHost(url, requestHost);
+    if (requestProtocol) {
+      url.protocol = requestProtocol;
+    }
     url.pathname =
       pathname === "/"
         ? `/${i18nConfig.defaultLocale}`

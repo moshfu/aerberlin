@@ -9,6 +9,7 @@ import { absoluteUrl, cn } from "@/lib/utils";
 import { buildCanonical } from "@/lib/seo";
 import type { SanityArtist } from "@/lib/sanity.types";
 import type { CSSProperties } from "react";
+import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -44,10 +45,14 @@ export default async function ArtistsPage({
     getTranslations("artists"),
     getTranslations("general"),
   ]);
+  noStore();
   const artists = await getArtists();
 
-  const filterParam = typeof search.filter === "string" ? search.filter : "all";
-  const filter = filterParam === "residents" || filterParam === "guests" ? filterParam : "all";
+  const filterParam = typeof search.filter === "string" ? search.filter : "residents";
+  const filter: "residents" | "guests" | "all" =
+    filterParam === "residents" || filterParam === "guests" || filterParam === "all"
+      ? filterParam
+      : "all";
   const filtered = artists.filter((artist) => {
     const role = artist.role?.toLowerCase();
     if (filter === "residents") {
@@ -67,9 +72,9 @@ export default async function ArtistsPage({
         description={<p>Residents. Guest. Sonic conspirators.</p>}
         actions={
           <nav className="aer-chipset flex flex-wrap gap-3" aria-label="Artist filters">
-            <FilterLink label={t("filters.all")} value="all" active={filter === "all"} />
             <FilterLink label={t("filters.residents")} value="residents" active={filter === "residents"} />
             <FilterLink label={t("filters.guests")} value="guests" active={filter === "guests"} />
+            <FilterLink label={t("filters.all")} value="all" active={filter === "all"} />
           </nav>
         }
       >
@@ -90,7 +95,12 @@ function ArtistsStructuredData({ locale, artists }: { locale: string; artists: S
   const itemList = artists.slice(0, 30).map((artist, index) => ({
     "@type": "ListItem",
     position: index + 1,
-    url: absoluteUrl(`/${locale}/artists/${artist.slug}`),
+    url:
+      artist.instagramRedirectOnly && artist.socials?.instagram
+        ? artist.socials.instagram
+        : artist.slug
+          ? absoluteUrl(`/${locale}/artists/${artist.slug}`)
+          : baseUrl,
     name: artist.name,
     genre: artist.tags ?? undefined,
   }));
@@ -144,11 +154,7 @@ function ArtistsStructuredData({ locale, artists }: { locale: string; artists: S
 function FilterLink({ label, value, active }: { label: string; value: string; active: boolean }) {
   return (
     <Link
-      href={
-        value === "all"
-          ? { pathname: "/artists" }
-          : { pathname: "/artists", query: { filter: value } }
-      }
+      href={{ pathname: "/artists", query: { filter: value } }}
       className={cn("aer-nav-button aer-nav-button--compact", active && "is-active")}
     >
       {label}
@@ -171,6 +177,11 @@ function ArtistTile({
   const portrait = artist.portrait?.asset
     ? urlFor(artist.portrait).width(640).height(640).quality(80).url()
     : null;
+  const instagramRedirectHref =
+    artist.instagramRedirectOnly && artist.socials?.instagram
+      ? artist.socials.instagram
+      : null;
+  const profileHref = artist.slug ? `/artists/${artist.slug}` : null;
 
   // Heuristic: auto scale X based on name length if no manual size provided
   const nameLength = artist.name.length;
@@ -184,9 +195,58 @@ function ArtistTile({
     "--artist-scale-width": `${(1 / scaleX) * 100}%`,
   };
 
+  if (instagramRedirectHref) {
+    return (
+      <a
+        href={instagramRedirectHref}
+        target="_blank"
+        rel="noreferrer"
+        className="group block focus-visible:outline-none"
+        aria-label={`${artist.name} — Instagram`}
+      >
+        <article className="aer-panel aer-artist transition-colors duration-200 group-hover:border-[rgba(255,255,255,0.32)] group-focus-visible:border-[rgba(255,255,255,0.32)]">
+          <header className="aer-artist__headline">
+            <div className="aer-artist__intro">
+              <h3
+                className="aer-artist__name"
+                style={nameStyle}
+              >
+                {artist.name}
+              </h3>
+              {tags.length ? (
+                <div className="aer-tag-strip aer-artist__tags">
+                  {tags.map((tag) => (
+                    <span key={tag}>{tag}</span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <div className="aer-artist__media">
+              <span className="aer-nav-button aer-nav-button--compact aer-artist__readmore">
+                {readMoreLabel}
+              </span>
+            </div>
+          </header>
+        </article>
+      </a>
+    );
+  }
+
+  if (!profileHref) {
+    return (
+      <article className="aer-panel aer-artist">
+        <header className="aer-artist__headline">
+          <div className="aer-artist__intro">
+            <h3 className="aer-artist__name" style={nameStyle}>{artist.name}</h3>
+          </div>
+        </header>
+      </article>
+    );
+  }
+
   return (
     <Link
-      href={`/artists/${artist.slug}`}
+      href={profileHref}
       className="group block focus-visible:outline-none"
       aria-label={`${artist.name} — ${readMoreLabel}`}
     >

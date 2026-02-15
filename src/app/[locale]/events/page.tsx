@@ -170,8 +170,8 @@ function EventRailItem({
     ? event.lineup.map((artist) => artist.name).join(" · ")
     : null;
   const ctaHref = ticketSalesActive
-    ? event.ticketingSource === "pretix" && event.pretixTicketShopUrl
-      ? event.pretixTicketShopUrl
+    ? event.ticketingSource === "pretix" && event.pretixEventId
+      ? `/tickets?event=${event.slug}`
       : event.ticketingSource === "external" && event.externalTicketUrl
         ? event.externalTicketUrl
         : `/tickets?event=${event.slug}`

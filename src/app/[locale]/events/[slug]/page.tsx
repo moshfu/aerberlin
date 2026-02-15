@@ -129,11 +129,11 @@ export default async function EventPage({ params }: EventPageProps) {
         disabled: soldOut,
         className: "event-action-link event-purchase-link",
       };
-    } else if (event.ticketingSource === "pretix" && event.pretixTicketShopUrl) {
+    } else if (event.ticketingSource === "pretix" && event.pretixEventId) {
       buyTicketsLink = {
         label: general("buyTickets"),
-        href: event.pretixTicketShopUrl,
-        external: true,
+        href: `/tickets?event=${event.slug}`,
+        external: false,
         disabled: soldOut,
         className: "event-action-link event-purchase-link",
       };
@@ -251,7 +251,16 @@ export default async function EventPage({ params }: EventPageProps) {
                 {event.address ? (
                   <div className="aer-list__item">
                     <span className="aer-list__label">Address</span>
-                    <span className="aer-list__value">{event.address}</span>
+                    <a
+                      className="aer-list__value underline decoration-dotted underline-offset-4"
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        `${event.venue ?? ""} ${event.address ?? ""}`,
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {event.address}
+                    </a>
                   </div>
                 ) : null}
               </div>
@@ -273,7 +282,7 @@ export default async function EventPage({ params }: EventPageProps) {
                   ) : null}
                   {event.address ? (
                     <a
-                      className="aer-nav-button aer-nav-button--compact event-action-link event-map-link"
+                      className="aer-nav-button aer-nav-button--compact event-action-link event-map-link w-full justify-center"
                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
                         `${event.venue ?? ""} ${event.address ?? ""}`,
                       )}`}
@@ -298,10 +307,28 @@ export default async function EventPage({ params }: EventPageProps) {
                 <div className="aer-panel__meta">Line-up</div>
                 <div className="aer-list aer-list--grid-square">
                   {event.lineup.map((artist) => (
-                    <Link key={artist._id} href={`/artists/${artist.slug}`} className="aer-list__item">
-                      <span className="aer-list__label">{artist.role ?? "Artist"}</span>
-                      <span className="aer-list__value">{artist.name}</span>
-                    </Link>
+                    artist.instagramRedirectOnly && artist.socials?.instagram ? (
+                      <a
+                        key={artist._id}
+                        href={artist.socials.instagram}
+                        className="aer-list__item"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <span className="aer-list__label">{artist.role ?? "Artist"}</span>
+                        <span className="aer-list__value">{artist.name}</span>
+                      </a>
+                    ) : artist.slug ? (
+                      <Link key={artist._id} href={`/artists/${artist.slug}`} className="aer-list__item">
+                        <span className="aer-list__label">{artist.role ?? "Artist"}</span>
+                        <span className="aer-list__value">{artist.name}</span>
+                      </Link>
+                    ) : (
+                      <span key={artist._id} className="aer-list__item">
+                        <span className="aer-list__label">{artist.role ?? "Artist"}</span>
+                        <span className="aer-list__value">{artist.name}</span>
+                      </span>
+                    )
                   ))}
                 </div>
               </section>
@@ -337,7 +364,7 @@ function EventStructuredData({ event, locale }: { event: SanityEvent; locale: st
     event.ticketingSource === "external"
       ? event.externalTicketUrl
       : event.ticketingSource === "pretix"
-        ? event.pretixTicketShopUrl
+        ? `/tickets?event=${event.slug}`
         : undefined;
 
   const eventSchema = {

@@ -56,12 +56,14 @@ export interface SanitySocials {
   bandcamp?: string;
   spotify?: string;
   youtube?: string;
+  tiktok?: string;
 }
 
 export interface SanityArtist {
   _id: string;
   name: string;
-  slug: string;
+  slug?: string;
+  instagramRedirectOnly?: boolean;
   role?: string;
   shortDescription?: string;
   marqueeText?: string;
@@ -72,6 +74,7 @@ export interface SanityArtist {
   gallery?: SanityImage[];
   bio?: PortableTextBlock[];
   socials?: SanitySocials;
+  bookingEmail?: string;
   pressKit?: {
     asset: { _ref: string; _type: "reference" };
     url?: string;

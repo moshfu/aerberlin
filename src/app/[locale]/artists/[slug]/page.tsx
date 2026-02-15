@@ -1,7 +1,7 @@
 import { cache } from "react";
 import Image from "next/image";
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { PortableTextContent } from "@/components/portable-text/portable-text";
@@ -13,6 +13,8 @@ import { absoluteUrl } from "@/lib/utils";
 import { buildCanonical } from "@/lib/seo";
 import type { SanityArtist, SanityRelease } from "@/lib/sanity.types";
 
+const redirectTo = redirect as unknown as (href: string) => never;
+
 interface ArtistPageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
@@ -22,10 +24,12 @@ export const revalidate = 120;
 export async function generateStaticParams() {
   const artists = await getArtists();
   return artists.flatMap((artist) =>
-    siteConfig.locales.map((locale) => ({
-      locale,
-      slug: artist.slug,
-    })),
+    artist.slug && !artist.instagramRedirectOnly
+      ? siteConfig.locales.map((locale) => ({
+          locale,
+          slug: artist.slug!,
+        }))
+      : [],
   );
 }
 
@@ -33,6 +37,16 @@ export async function generateMetadata({ params }: ArtistPageProps): Promise<Met
   const { locale, slug } = await params;
   const artist = await getArtistBySlug(slug);
   if (!artist) {
+    return {};
+  }
+  if (artist.instagramRedirectOnly && artist.socials?.instagram) {
+    return {
+      title: `${artist.name} · Instagram`,
+      description: artist.role ?? undefined,
+      alternates: { canonical: artist.socials.instagram },
+    };
+  }
+  if (!artist.slug) {
     return {};
   }
   const title = `${artist.name} · ${siteConfig.name}`;
@@ -67,6 +81,12 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
   if (!artist) {
     notFound();
   }
+  if (artist.instagramRedirectOnly && artist.socials?.instagram) {
+    redirectTo(artist.socials.instagram);
+  }
+  if (!artist.slug) {
+    notFound();
+  }
 
   const [t] = await Promise.all([getTranslations("artists")]);
   const marquee = artist.marqueeText ?? `${artist.name.toUpperCase()} // LIVE TRANSMISSIONS`;
@@ -76,7 +96,9 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
     : null;
   const tags = artist.tags ?? [];
 
-  const ordered = [...allArtists].sort((a, b) => a.name.localeCompare(b.name));
+  const ordered = allArtists
+    .filter((entry) => !entry.instagramRedirectOnly && Boolean(entry.slug))
+    .sort((a, b) => a.name.localeCompare(b.name));
   const idx = ordered.findIndex((entry) => entry.slug === artist.slug);
   const hasNeighbours = ordered.length > 1 && idx !== -1;
   const prevArtist = hasNeighbours
@@ -90,6 +112,7 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
     artist.socials?.spotify ? { label: "Spotify", href: artist.socials.spotify } : null,
     artist.socials?.instagram ? { label: "Instagram", href: artist.socials.instagram } : null,
     artist.socials?.youtube ? { label: "YouTube", href: artist.socials.youtube } : null,
+    artist.socials?.tiktok ? { label: "TikTok", href: artist.socials.tiktok } : null,
   ].filter((entry): entry is SocialLink => Boolean(entry));
 
   const featuredReleases = artist.featuredReleases?.length
@@ -140,12 +163,14 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
                   {entry.label}
                 </a>
               ))}
-              <a
-                href="mailto:booking@aerberlin.de"
-                className="aer-nav-button aer-nav-button--compact"
-              >
-                Booking
-              </a>
+              {artist.bookingEmail ? (
+                <a
+                  href={`mailto:${artist.bookingEmail}`}
+                  className="aer-nav-button aer-nav-button--compact"
+                >
+                  Booking
+                </a>
+              ) : null}
             </div>
             {artist.pressKit?.url ? (
               <a

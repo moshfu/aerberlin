@@ -3,6 +3,7 @@ import { Link } from "@/i18n/routing";
 import { getEvents } from "@/server/sanity";
 import { cn, formatDateTime } from "@/lib/utils";
 import { SubpageFrame } from "@/components/layout/subpage-frame";
+import { PurchaseWidget } from "@/components/tickets/purchase-widget";
 
 export default async function TicketsPage({
   params,
@@ -20,7 +21,7 @@ export default async function TicketsPage({
   const now = new Date();
   const events = (await getEvents()).filter((event) => {
     if (event.ticketingSource !== "pretix") return false;
-    if (!event.pretixTicketShopUrl) return false;
+    if (!event.pretixEventId) return false;
     const cutoff = new Date(event.end ?? event.start);
     return cutoff >= now;
   });
@@ -32,40 +33,52 @@ export default async function TicketsPage({
     activeEvent?.description?.find(
       (block) => block?._type === "block" && Array.isArray(block.children),
     ) ?? null;
-  const previewCopy = Array.isArray(primaryBlock?.children)
+  const rawPreviewCopy = Array.isArray(primaryBlock?.children)
     ? primaryBlock.children.find(isPortableTextSpan)?.text ?? null
     : null;
+  const previewCopy =
+    rawPreviewCopy && !/^\s*line[\s-]?up\s*:?\s*$/i.test(rawPreviewCopy)
+      ? rawPreviewCopy
+      : null;
 
   return (
-    <SubpageFrame
-      title={t("title")}
-      marqueeText="TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//"
-      actions={
-        hasEvents ? (
-          <nav className="aer-chipset" aria-label="Ticketed events">
-            {events.map((event) => (
-              <Link
-                key={event._id}
-                href={{ pathname: "/tickets", query: { event: event.slug } }}
-                className={cn(
-                  "aer-nav-button aer-nav-button--compact",
-                  selectedEvent?.slug === event.slug && "is-active",
-                )}
-              >
-                {event.title}
-              </Link>
-            ))}
-          </nav>
-        ) : null
-      }
-      footnote={hasEvents ? "All ticket purchases are handled securely on Pretix." : undefined}
+      <SubpageFrame
+        title={t("title")}
+        marqueeText="TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//TICKETS//"
+        actions={
+          hasEvents ? (
+            <nav className="aer-chipset" aria-label="Ticketed events">
+              {events.map((event) => (
+                <Link
+                  key={event._id}
+                  href={{ pathname: "/tickets", query: { event: event.slug } }}
+                  className={cn(
+                    "aer-nav-button aer-nav-button--compact",
+                    selectedEvent?.slug === event.slug && "is-active",
+                  )}
+                >
+                  {event.title}
+                </Link>
+              ))}
+              {activeEvent ? (
+                <Link
+                  href={{ pathname: `/events/${activeEvent.slug}` }}
+                  className="aer-nav-button aer-nav-button--compact"
+                >
+                  Back to event
+                </Link>
+              ) : null}
+            </nav>
+          ) : null
+        }
+        footnote={undefined}
     >
       {!hasEvents ? (
         <div className="aer-panel text-[0.78rem] uppercase tracking-[0.2em] text-muted">
           Pretix links are not configured. Add a Pretix ticket shop URL in Sanity to enable sales.
         </div>
-      ) : activeEvent && activeEvent.pretixTicketShopUrl ? (
-        <section className="aer-panel space-y-4">
+      ) : activeEvent && activeEvent.pretixEventId ? (
+        <section className="space-y-4">
           <header className="space-y-2">
             <p className="text-[0.62rem] uppercase tracking-[0.24em] text-[rgba(255,255,255,0.55)]">
               {formatDateTime(activeEvent.start, locale, {
@@ -86,27 +99,13 @@ export default async function TicketsPage({
               {previewCopy}
             </p>
           ) : null}
-          <div className="flex flex-wrap items-center gap-3">
-            {activeEvent.ticketSalesOpen === false ? (
-              <span className="text-[0.68rem] uppercase tracking-[0.24em] text-[rgba(255,255,255,0.62)]">
-                {general("salesNotStarted")}
-              </span>
-            ) : (
-              <>
-                <a
-                  href={activeEvent.pretixTicketShopUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="aer-nav-button aer-nav-button--compact event-action-link event-purchase-link"
-                >
-                  {general("buyTickets")}
-                </a>
-                <span className="text-[0.62rem] uppercase tracking-[0.22em] text-[rgba(255,255,255,0.45)]">
-                  You will be redirected to Pretix to complete checkout.
-                </span>
-              </>
-            )}
-          </div>
+          {activeEvent.ticketSalesOpen === false ? (
+            <div className="aer-panel text-[0.68rem] uppercase tracking-[0.24em] text-[rgba(255,255,255,0.62)]">
+              {general("salesNotStarted")}
+            </div>
+          ) : (
+            <PurchaseWidget pretixEventId={activeEvent.pretixEventId} />
+          )}
         </section>
       ) : null}
     </SubpageFrame>

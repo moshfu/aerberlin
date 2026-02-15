@@ -33,6 +33,7 @@ export const eventFields = `{
     _id,
     name,
     "slug": slug.current,
+    instagramRedirectOnly,
     portrait {
       ...,
       asset-> {
@@ -70,6 +71,7 @@ export const artistFields = `{
   _id,
   name,
   "slug": slug.current,
+  instagramRedirectOnly,
   role,
   shortDescription,
   marqueeText,
@@ -77,6 +79,7 @@ export const artistFields = `{
   nameStretchY,
   tags,
   socials,
+  bookingEmail,
   bio,
   featuredReleases[]{
     title,

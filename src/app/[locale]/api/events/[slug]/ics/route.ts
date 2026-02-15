@@ -3,15 +3,18 @@ import { getEventBySlug, getEvents } from "@/server/sanity";
 import ical from "ical-generator";
 import type { PortableTextBlock } from "sanity";
 
+// Locale-aware wrapper for /api/events/[slug]/ics to avoid locale redirects breaking the download.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function GET(request: Request, context: any) {
-  const { slug } = context.params ?? {};
+export async function GET(request: Request, { params }: any) {
+  const slug = params?.slug as string | undefined;
+  if (!slug) {
+    return NextResponse.json({ message: "Missing slug" }, { status: 400 });
+  }
   const url = new URL(request.url);
   const orderCode = url.searchParams.get("code") ?? url.searchParams.get("order");
 
   let event = await getEventBySlug(slug);
   if (!event) {
-    // Fallback: allow Pretix event IDs to resolve via pretixEventId
     const events = await getEvents();
     event = events.find((ev) => ev.pretixEventId === slug) ?? null;
   }
